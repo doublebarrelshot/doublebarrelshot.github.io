@@ -1,15 +1,392 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>doublebarrelshot</title>
-<script>
-        window.location.href = "https://ffm.to/doublebarrelshot";
-    </script>
+    <link rel="icon" href="logo/doublebarrelshot2.png" type="image/png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+        color: #333;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .logo img {
+        height: 80px; /* Adjust as needed */
+        animation: logoAnim 1s ease-in-out;
+        transition: transform 0.3s ease;
+      }
+      .logo img:hover {
+        transform: scale(1.1);
+      }
+      @keyframes logoAnim {
+        0% {
+          opacity: 0;
+          transform: scale(0.5);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      nav a {
+        margin-left: 20px;
+        font-size: 24px;
+        color: #333;
+        text-decoration: none;
+      }
+      nav a:hover {
+        color: #007bff;
+      }
+      .hero {
+        text-align: center;
+        padding: 50px 20px;
+        background-color: #007bff;
+        color: #fff;
+      }
+      .links {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .links ul {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        list-style: none;
+        padding: 0;
+      }
+      .links li a {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background-color: #fff;
+        border-radius: 20px;
+        text-decoration: none;
+        color: #333;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+      }
+      .links li a:hover {
+        background-color: #f0f0f0;
+      }
+      .links li a:active {
+        box-shadow: none;
+        transform: translateY(2px);
+      }
+      .links li img {
+        width: 32px;
+        height: 32px;
+        margin-right: 10px;
+      }
+      .contact {
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .contact form {
+        display: flex;
+        flex-direction: column;
+      }
+      .contact label {
+        margin-top: 10px;
+      }
+      .contact input,
+      .contact textarea {
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      .contact button {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: transform 0.1s ease, box-shadow 0.1s ease;
+      }
+      .contact button:hover {
+        background-color: #0056b3;
+      }
+      .contact button:active {
+        box-shadow: none;
+        transform: translateY(2px);
+      }
+      /* Honeypot hidden field - for basic spam protection (works if using a server-side handler) */
+      .honeypot {
+        display: none;
+      }
+    </style>
   </head>
   <body>
-    <h1>doublebarrelshot</h1>
+    <header>
+      <div class="logo">
+        <a
+          href="https://open.spotify.com/artist/4R6fu0Zztw59xHFNUDqBD0"
+          target="_blank"
+        >
+          <img src="logo/doublebarrelshot2.png" alt="doublebarrelshot Logo" />
+        </a>
+      </div>
+      <nav>
+        <a href="https://www.youtube.com/@doublebarrelshot" target="_blank"
+          ><i class="fab fa-youtube"></i
+        ></a>
+        <a href="https://www.instagram.com/doublebarrelshot/" target="_blank"
+          ><i class="fab fa-instagram"></i
+        ></a>
+        <!-- <a href="https://www.tiktok.com/@doublebarrelshot" target="_blank"
+          ><i class="fab fa-tiktok"></i
+        ></a> -->
+        <a
+          href="https://open.spotify.com/artist/4R6fu0Zztw59xHFNUDqBD0"
+          target="_blank"
+          ><i class="fab fa-spotify"></i
+        ></a>
+        <a href="#contact" onclick="focusMessage(); return true;"
+          ><i class="fas fa-envelope"></i
+        ></a>
+      </nav>
+    </header>
+    <!-- <section class="hero">
+      <h1>doublebarrelshot</h1>
+    </section> -->
+    <section class="links">
+      <h2>doublebarrelshot music</h2>
+      <ul>
+        <li>
+          <a
+            href="https://us.7digital.com/artist/doublebarrelshot"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=7digital.com"
+              alt="7digital"
+            />7digital</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://music.amazon.com/artists/B0FY778CSX/doublebarrelshot"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=amazon.com"
+              alt="Amazon"
+            />Amazon</a
+          >
+        </li>
+        <li>
+          <a href="https://play.anghami.com/artist/26123074" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=anghami.com"
+              alt="Anghami"
+            />Anghami</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://music.apple.com/artist/doublebarrelshot/1849632735"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=apple.com"
+              alt="Apple Music/iTunes"
+            />Apple Music/iTunes</a
+          >
+        </li>
+        <li>
+          <a href="https://audiomack.com/doublebarrelshot" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=audiomack.com"
+              alt="Audiomack"
+            />Audiomack</a
+          >
+        </li>
+        <li>
+          <a href="https://www.boomplay.com/artists/118756166" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=boomplay.com"
+              alt="Boomplay"
+            />Boomplay</a
+          >
+        </li>
+        <li>
+          <a href="https://doublebarrelshot.bandcamp.com" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=bandcamp.com"
+              alt="Bandcamp.com"
+            />Bandcamp.com</a
+          >
+        </li>
+        <li>
+          <a href="https://www.deezer.com/en/artist/353406092" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=deezer.com"
+              alt="Deezer"
+            />Deezer</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://www.music-flo.com/detail/artist/412785998"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=music-flo.com"
+              alt="Flo"
+            />Flo</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://www.iheart.com/artist/doublebarrelshot-48468270/"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=iheart.com"
+              alt="iHeartRadio"
+            />iHeartRadio</a
+          >
+        </li>
+        <li>
+          <a href="https://www.instagram.com/doublebarrelshot/" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=instagram.com"
+              alt="Instagram"
+            />Instagram</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://www.kkbox.com/hk/tc/artist/GtGL8F-1w6HSD9-fso/albums"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=kkbox.com"
+              alt="KKBox"
+            />KKBox</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://music.line.me/webapp/artist/mi0000000028b7fb63/albums"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=line.me"
+              alt="LINE Music"
+            />LINE Music</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://www.pandora.com/artist/doublebarrelshot/ARZh3rblfvjznqk"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=pandora.com"
+              alt="Pandora"
+            />Pandora</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://www.qobuz.com/us-en/interpreter/doublebarrelshot/29153724"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=qobuz.com"
+              alt="Qobuz"
+            />Qobuz</a
+          >
+        </li>
+        <li>
+          <a href="https://soundcloud.com/doublebarrelshot" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=soundcloud.com"
+              alt="Soundcloud.com"
+            />Soundcloud.com</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://open.spotify.com/artist/4R6fu0Zztw59xHFNUDqBD0"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=spotify.com"
+              alt="Spotify"
+            />Spotify</a
+          >
+        </li>
+        <li>
+          <a href="https://tidal.com/artist/69088628" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=tidal.com"
+              alt="TIDAL"
+            />TIDAL</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://www.youtube.com/channel/UC2stfrCM7n59ZogxYDBnoOg"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com"
+              alt="YouTube Music"
+            />YouTube Music</a
+          >
+        </li>
+        <li>
+          <a href="https://www.youtube.com/@doublebarrelshot" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com"
+              alt="YouTube"
+            />YouTube</a
+          >
+        </li>
+      </ul>
+    </section>
+    <section id="contact" class="contact">
+      <!-- <h2>Send a Message to doublebarrelshot</h2> -->
+      <form
+        action="mailto:doublebarrelshotofficial@gmail.com"
+        method="get"
+        enctype="text/plain"
+        target="_blank"
+      >
+        <!-- <label for="message">Send a Message to doublebarrelshot:</label> -->
+        <h2>Send a Message to doublebarrelshot</h2>
 
-    <a href="https://ffm.to/doublebarrelshot" target="_blank">doublebarrelshot</a>
+        <textarea
+          id="message"
+          name="body"
+          rows="5"
+          placeholder="Your message here..."
+        ></textarea>
+        <!-- Honeypot -->
+        <!-- <div class="honeypot">
+          <input type="text" name="honeypot" />
+        </div> -->
+        <button type="submit">Send</button>
+      </form>
+    </section>
+
+    <script>
+      function focusMessage() {
+        setTimeout(() => {
+          document.getElementById("message").focus();
+        }, 300);
+      }
+    </script>
   </body>
 </html>
