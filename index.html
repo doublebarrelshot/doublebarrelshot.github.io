@@ -10,6 +10,19 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
     <style>
+      /* --- CSS Variables for Easy Customization --- */
+      :root {
+        --color-neon: #00ffff; /* Neon Blue */
+        --color-header-bg: var(--color-neon);
+        --color-header-text: #ffffff;
+
+        /* UPDATED: Triangle and Text Colors for Black/Neon Theme */
+        --color-background-triangle: #000000; /* Black background for triangles */
+        --color-text: var(--color-neon); /* Neon text on black background */
+        --color-background-hover: #333333; /* Dark grey hover state */
+      }
+
+      /* --- BASE STYLES & LAYOUT --- */
       body {
         font-family: Arial, sans-serif;
         margin: 0;
@@ -23,33 +36,26 @@
         justify-content: space-between;
         align-items: center;
         padding: 20px;
-        background-color: #fff;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        background-color: var(--color-header-bg);
+        box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+      }
+      .logo img {
+        height: 80px;
+      }
+      nav a {
+        margin-left: 20px;
+        font-size: 24px;
+        color: var(--color-header-text);
+        text-decoration: none;
+        transition: color 0.3s ease;
+      }
+      nav a:hover {
+        color: #333333;
       }
       nav .nav-icon {
         height: 24px;
         width: 24px;
         vertical-align: top;
-      }
-
-      .logo img {
-        height: 80px;
-      }
-
-      nav a {
-        margin-left: 20px;
-        font-size: 24px;
-        color: #333;
-        text-decoration: none;
-      }
-      nav a:hover {
-        color: #007bff;
-      }
-      .hero {
-        text-align: center;
-        padding: 50px 20px;
-        background-color: #007bff;
-        color: #fff;
       }
       .links {
         padding: 20px;
@@ -57,7 +63,7 @@
         margin: 0 auto;
       }
 
-      /* SCROLLING MARQUEE STYLES */
+      /* --- MARQUEE STYLES --- */
       .scrolling-container {
         overflow: hidden;
         white-space: nowrap;
@@ -72,7 +78,6 @@
         animation: scroll-rtl 30s linear infinite;
         font-size: 1em;
       }
-
       @keyframes scroll-rtl {
         0% {
           transform: translateX(0);
@@ -81,7 +86,6 @@
           transform: translateX(-100%);
         }
       }
-
       @-webkit-keyframes scroll-rtl {
         0% {
           -webkit-transform: translateX(0);
@@ -90,54 +94,59 @@
           -webkit-transform: translateX(-100%);
         }
       }
-      /* END OF SCROLLING MARQUEE STYLES */
 
-      /* UPDATED STYLES FOR 3D EFFECT AND SUNKEN CONTENT */
+      /* --- LINKS GRID & BASE TRIANGLE STYLES --- */
       .links ul {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-        gap: 5px; /* Reduced gap */
+        /* Vertical gap 15px, Horizontal gap 5px */
+        gap: 15px 5px;
         list-style: none;
         padding: 0;
-
-        /* 3D CONTEXT */
         perspective: 800px;
         transform-style: preserve-3d;
       }
+
       .links li a {
-        /* GENERAL STYLES FOR ALL TRIANGLES */
+        /* General Properties */
         display: flex;
         align-items: center;
-
         height: 60px;
         padding: 5px;
-
-        background-color: #fff;
+        /* UPDATED: Black background */
+        background-color: var(--color-background-triangle);
         border-radius: 0;
         text-decoration: none;
-        color: #333;
-
+        /* UPDATED: Neon text color */
+        color: var(--color-text);
         white-space: normal;
         word-break: break-word;
         text-align: center;
         font-size: 0.8em;
-        line-height: 1.2; /* Added for better text centering */
+        line-height: 1.2;
 
-        /* STYLED BORDER: Thin, subtle border using box-shadow */
-        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1),
-          /* Thin, subtle border */ 0 2px 4px rgba(0, 0, 0, 0.15); /* Soft, original drop shadow */
-
-        /* 3D PROPERTIES AND TRANSITION */
+        /* 3D and Transition */
         transform-style: preserve-3d;
         transform: translateZ(0);
         transition: transform 0.4s ease, box-shadow 0.4s ease;
-
-        /* New: For positioning inner content and pseudo-elements */
         position: relative;
-        overflow: hidden; /* Ensures inner content doesn't break clip-path */
+        overflow: hidden;
+
+        /* Neon Border (Normal State) - Thicker Sides */
+        box-shadow: 0 0 0 1px rgba(0, 255, 255, 0.4),
+          /* Faint overall neon border */ -2px 0 0 0px rgba(0, 255, 255, 0.3),
+          /* Thicker left side (faint) */ 2px 0 0 0px rgba(0, 255, 255, 0.3),
+          /* Thicker right side (faint) */ 0 2px 4px rgba(0, 0, 0, 0.15); /* Soft drop shadow (optional on black) */
       }
 
-      /* Pseudo-elements for "inner shadow" (Sunken effect) */
+      /* Force icons to be visible against black background */
+      .links li a img {
+        width: 20px;
+        height: 20px;
+        margin-right: 0;
+      }
+
+      /* --- INNER SUNKEN EFFECT (Pseudo-elements) --- */
       .links li a::before,
       .links li a::after {
         content: "";
@@ -146,59 +155,50 @@
         right: 0;
         top: 0;
         bottom: 0;
-        pointer-events: none; /* Allows clicks to pass through */
+        pointer-events: none;
         transition: opacity 0.4s ease;
-        opacity: 0; /* Hidden by default */
-
-        /* Clipping the pseudo-elements to match the triangle shape */
+        opacity: 0;
         clip-path: inherit;
         -webkit-clip-path: inherit;
       }
-
-      /* Darker shadow for inner depth */
       .links li a::before {
-        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3);
+        box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.1); /* Adjusted inner shadow for black background */
       }
-
-      /* Lighter highlight for inner depth */
       .links li a::after {
-        box-shadow: inset -2px -2px 5px rgba(255, 255, 255, 0.7);
+        box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.7); /* Adjusted inner highlight for black background */
       }
 
-      /* HOVER EFFECTS: Triangle raises, inner content sinks */
+      /* --- HOVER EFFECTS --- */
       .links li a:hover {
-        background-color: #f0f0f0;
+        /* UPDATED: Darker grey hover background */
+        background-color: var(--color-background-hover);
 
-        /* STYLED BORDER ON HOVER: Clearer accent border and stronger drop shadow for 3D raise */
-        box-shadow: 0 0 0 2px #007bff,
-          /* Clearer, stylish border */ 0 10px 20px rgba(0, 0, 0, 0.4); /* Stronger drop shadow for 3D raise */
+        /* Neon Border (Hover State) - Stronger Thicker Sides */
+        box-shadow: 0 0 0 3px var(--color-neon),
+          /* Overall visible neon border */ -5px 0 0 0px var(--color-neon),
+          /* Significantly thicker left side */ 5px 0 0 0px var(--color-neon),
+          /* Significantly thicker right side */ 0 10px 20px rgba(0, 0, 0, 0.8); /* Stronger drop shadow on black */
 
-        transform: translateZ(
-          20px
-        ); /* The triangle itself still raises (base transform) */
+        transform: translateZ(20px);
       }
-
-      /* Activate inner shadow on hover */
       .links li a:hover::before,
       .links li a:hover::after {
-        opacity: 1;
+        opacity: 1; /* Activate inner shadow on hover */
       }
-
-      /* Inner content (img and span) styles */
-      .links li a img,
-      .links li a span {
-        position: relative;
-        transition: transform 0.4s ease;
-        z-index: 1; /* Ensure it's above pseudo-elements */
-      }
-
-      /* Make inner content appear "pushed in" on hover */
       .links li a:hover img,
       .links li a:hover span {
-        transform: translateZ(-10px); /* Push image/text 10px into the screen */
+        transform: translateZ(-10px); /* Push inner content in */
+      }
+      .links li a:active {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        transform: translateZ(0) translateY(0);
+      }
+      .links li a:active::before,
+      .links li a:active::after {
+        opacity: 0; /* Deactivate inner shadow on active */
       }
 
-      /* ODD ELEMENTS: POINTING UP (LOGO TOP, TEXT BOTTOM) */
+      /* --- ODD TRIANGLES (Pointing Up) --- */
       .links li:nth-child(odd) a {
         clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
         -webkit-clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
@@ -209,137 +209,107 @@
         margin-bottom: 5px;
         margin-top: 0;
       }
-      /* 3D EFFECT FOR ODD - Triangle raises with a slight tilt */
       .links li:nth-child(odd) a:hover {
         transform: translateZ(20px) rotateX(-5deg) translateY(5px);
       }
-      /* Adjust inner shadow direction for odd triangles */
-      .links li:nth-child(odd) a:hover::before {
-        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3);
-      }
-      .links li:nth-child(odd) a:hover::after {
-        box-shadow: inset -2px -2px 5px rgba(255, 255, 255, 0.7);
-      }
 
-      /* EVEN ELEMENTS: POINTING DOWN (TEXT TOP, LOGO BOTTOM) */
+      /* --- EVEN TRIANGLES (Pointing Down) --- */
       .links li:nth-child(even) a {
         clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
         -webkit-clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
         flex-direction: column-reverse;
         justify-content: flex-start;
         padding-top: 1px;
-        padding-bottom: 5px;
+        /* UPDATED: Increased padding-bottom to 20px */
+        padding-bottom: 20px;
       }
       .links li:nth-child(even) a img {
         margin-top: 5px;
         margin-bottom: 0;
       }
-      /* 3D EFFECT FOR EVEN - Triangle raises with a slight tilt */
       .links li:nth-child(even) a:hover {
         transform: translateZ(20px) rotateX(5deg) translateY(-5px);
       }
-      /* Adjust inner shadow direction for even triangles */
-      .links li:nth-child(even) a:hover::before {
-        box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.3); /* Invert shadow direction */
-      }
-      .links li:nth-child(even) a:hover::after {
-        box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.7); /* Invert highlight direction */
-      }
 
-      /* GENERAL ACTIVE EFFECT */
-      .links li a:active {
-        /* Reset box-shadow to a basic press look */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        transform: translateZ(0) translateY(0);
-      }
-      /* Deactivate inner shadow on active */
-      .links li a:active::before,
-      .links li a:active::after {
-        opacity: 0;
-      }
-
-      .links li img {
-        width: 20px;
-        height: 20px;
-        margin-right: 0;
-      }
+      /* --- CONTACT SECTION & SCROLL BUTTON --- */
       .contact {
         padding: 20px;
         max-width: 600px;
         margin: 0 auto;
         position: relative;
       }
-
       .scroll-up-button {
         position: absolute;
         top: 20px;
         left: 50%;
         transform: translateX(-50%);
-
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        background-color: #fff;
-        border: 2px solid #333;
+        /* UPDATED: Black background for button */
+        background-color: #000000;
+        /* UPDATED: Neon border */
+        border: 2px solid var(--color-neon);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-
         display: flex;
         justify-content: center;
         align-items: center;
-
         font-size: 20px;
-        color: #333;
+        /* UPDATED: Neon icon color */
+        color: var(--color-neon);
         text-decoration: none;
         z-index: 10;
         transition: all 0.2s;
       }
-
       .scroll-up-button:hover {
-        color: #fff;
-        background-color: #007bff;
-        border-color: #007bff;
+        color: #000; /* Dark text on hover */
+        background-color: var(--color-neon); /* Neon background on hover */
+        border-color: var(--color-neon);
       }
-
       .contact .scrolling-container {
         margin-top: 50px;
       }
-
       .contact form {
         display: flex;
         flex-direction: column;
-      }
-      .contact label {
-        margin-top: 10px;
       }
       .contact input,
       .contact textarea {
         padding: 10px;
         margin-top: 5px;
-        border: 1px solid #ccc;
+        /* UPDATED: Black background, Neon border, Neon text */
+        background-color: #000000;
+        color: var(--color-neon);
+        border: 1px solid var(--color-neon);
         border-radius: 5px;
+        resize: vertical;
+      }
+      .contact input::placeholder,
+      .contact textarea::placeholder {
+        color: rgba(0, 255, 255, 0.5); /* Fainter neon placeholder text */
       }
       .contact button {
         margin-top: 20px;
         padding: 8px 15px;
         background-color: #000000;
-        color: #fff;
+        /* UPDATED: Neon text color */
+        color: var(--color-neon);
         border: none;
         border-radius: 20px;
         cursor: pointer;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        transition: transform 0.1s ease, box-shadow 0.1s ease;
+        transition: all 0.2s ease;
         align-self: center;
         font-size: 16px;
       }
       .contact button:hover {
         background-color: #333;
+        /* UPDATED: Add neon glow on hover */
+        box-shadow: 0 0 10px var(--color-neon);
       }
       .contact button:active {
         box-shadow: none;
         transform: translateY(2px);
-      }
-      .honeypot {
-        display: none;
       }
     </style>
   </head>
@@ -376,6 +346,7 @@
         ></a>
       </nav>
     </header>
+
     <section class="links">
       <h2 class="scrolling-container">
         <span class="scrolling-content">doublebarrelshot music     </span>
@@ -541,11 +512,13 @@
         </li>
       </ul>
     </section>
+
     <section class="contact">
       <a href="#top" class="scroll-up-button" title="Go to top">
         <i class="fas fa-arrow-up"></i>
       </a>
     </section>
+
     <section id="contact" class="contact">
       <form onsubmit="handleMailto(event);">
         <textarea
