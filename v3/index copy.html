@@ -92,7 +92,7 @@
       }
       /* END OF SCROLLING MARQUEE STYLES */
 
-      /* UPDATED STYLES FOR 3D EFFECT AND SUNKEN CONTENT */
+      /* UPDATED STYLES FOR 3D EFFECT */
       .links ul {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -121,81 +121,13 @@
         word-break: break-word;
         text-align: center;
         font-size: 0.8em;
-        line-height: 1.2; /* Added for better text centering */
 
-        /* STYLED BORDER: Thin, subtle border using box-shadow */
-        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1),
-          /* Thin, subtle border */ 0 2px 4px rgba(0, 0, 0, 0.15); /* Soft, original drop shadow */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
         /* 3D PROPERTIES AND TRANSITION */
         transform-style: preserve-3d;
         transform: translateZ(0);
         transition: transform 0.4s ease, box-shadow 0.4s ease;
-
-        /* New: For positioning inner content and pseudo-elements */
-        position: relative;
-        overflow: hidden; /* Ensures inner content doesn't break clip-path */
-      }
-
-      /* Pseudo-elements for "inner shadow" (Sunken effect) */
-      .links li a::before,
-      .links li a::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        pointer-events: none; /* Allows clicks to pass through */
-        transition: opacity 0.4s ease;
-        opacity: 0; /* Hidden by default */
-
-        /* Clipping the pseudo-elements to match the triangle shape */
-        clip-path: inherit;
-        -webkit-clip-path: inherit;
-      }
-
-      /* Darker shadow for inner depth */
-      .links li a::before {
-        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3);
-      }
-
-      /* Lighter highlight for inner depth */
-      .links li a::after {
-        box-shadow: inset -2px -2px 5px rgba(255, 255, 255, 0.7);
-      }
-
-      /* HOVER EFFECTS: Triangle raises, inner content sinks */
-      .links li a:hover {
-        background-color: #f0f0f0;
-
-        /* STYLED BORDER ON HOVER: Clearer accent border and stronger drop shadow for 3D raise */
-        box-shadow: 0 0 0 2px #007bff,
-          /* Clearer, stylish border */ 0 10px 20px rgba(0, 0, 0, 0.4); /* Stronger drop shadow for 3D raise */
-
-        transform: translateZ(
-          20px
-        ); /* The triangle itself still raises (base transform) */
-      }
-
-      /* Activate inner shadow on hover */
-      .links li a:hover::before,
-      .links li a:hover::after {
-        opacity: 1;
-      }
-
-      /* Inner content (img and span) styles */
-      .links li a img,
-      .links li a span {
-        position: relative;
-        transition: transform 0.4s ease;
-        z-index: 1; /* Ensure it's above pseudo-elements */
-      }
-
-      /* Make inner content appear "pushed in" on hover */
-      .links li a:hover img,
-      .links li a:hover span {
-        transform: translateZ(-10px); /* Push image/text 10px into the screen */
       }
 
       /* ODD ELEMENTS: POINTING UP (LOGO TOP, TEXT BOTTOM) */
@@ -209,16 +141,11 @@
         margin-bottom: 5px;
         margin-top: 0;
       }
-      /* 3D EFFECT FOR ODD - Triangle raises with a slight tilt */
+      /* 3D EFFECT FOR ODD */
       .links li:nth-child(odd) a:hover {
+        background-color: #f0f0f0;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
         transform: translateZ(20px) rotateX(-5deg) translateY(5px);
-      }
-      /* Adjust inner shadow direction for odd triangles */
-      .links li:nth-child(odd) a:hover::before {
-        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.3);
-      }
-      .links li:nth-child(odd) a:hover::after {
-        box-shadow: inset -2px -2px 5px rgba(255, 255, 255, 0.7);
       }
 
       /* EVEN ELEMENTS: POINTING DOWN (TEXT TOP, LOGO BOTTOM) */
@@ -227,6 +154,7 @@
         -webkit-clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
         flex-direction: column-reverse;
         justify-content: flex-start;
+        /* CHANGE: Reducing top padding to lift content */
         padding-top: 1px;
         padding-bottom: 5px;
       }
@@ -234,28 +162,17 @@
         margin-top: 5px;
         margin-bottom: 0;
       }
-      /* 3D EFFECT FOR EVEN - Triangle raises with a slight tilt */
+      /* 3D EFFECT FOR EVEN */
       .links li:nth-child(even) a:hover {
+        background-color: #f0f0f0;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
         transform: translateZ(20px) rotateX(5deg) translateY(-5px);
-      }
-      /* Adjust inner shadow direction for even triangles */
-      .links li:nth-child(even) a:hover::before {
-        box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.3); /* Invert shadow direction */
-      }
-      .links li:nth-child(even) a:hover::after {
-        box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.7); /* Invert highlight direction */
       }
 
       /* GENERAL ACTIVE EFFECT */
       .links li a:active {
-        /* Reset box-shadow to a basic press look */
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         transform: translateZ(0) translateY(0);
-      }
-      /* Deactivate inner shadow on active */
-      .links li a:active::before,
-      .links li a:active::after {
-        opacity: 0;
       }
 
       .links li img {
@@ -388,7 +305,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=7digital.com"
               alt="7digital"
-            /><span>7digital</span></a
+            />7digital</a
           >
         </li>
         <li>
@@ -398,7 +315,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=amazon.com"
               alt="Amazon"
-            /><span>Amazon</span></a
+            />Amazon</a
           >
         </li>
         <li>
@@ -406,7 +323,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=anghami.com"
               alt="Anghami"
-            /><span>Anghami</span></a
+            />Anghami</a
           >
         </li>
         <li>
@@ -416,7 +333,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=apple.com"
               alt="Apple Music/iTunes"
-            /><span>Apple<br />Music/iTunes</span></a
+            />Apple<br />Music/iTunes</a
           >
         </li>
         <li>
@@ -424,7 +341,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=audiomack.com"
               alt="Audiomack"
-            /><span>Audiomack</span></a
+            />Audiomack</a
           >
         </li>
         <li>
@@ -432,7 +349,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=deezer.com"
               alt="Deezer"
-            /><span>Deezer</span></a
+            />Deezer</a
           >
         </li>
         <li>
@@ -442,7 +359,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=music-flo.com"
               alt="Flo"
-            /><span>Flo</span></a
+            />Flo</a
           >
         </li>
         <li>
@@ -452,7 +369,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=iheart.com"
               alt="iHeartRadio"
-            /><span>iHeart<br />Radio</span></a
+            />iHeart<br />Radio</a
           >
         </li>
         <li>
@@ -460,7 +377,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=instagram.com"
               alt="Instagram"
-            /><span>Instagram</span></a
+            />Instagram</a
           >
         </li>
         <li>
@@ -470,7 +387,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=kkbox.com"
               alt="KKBox"
-            /><span>KKBox</span></a
+            />KKBox</a
           >
         </li>
         <li>
@@ -480,7 +397,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=line.me"
               alt="LINE Music"
-            /><span>LINE<br />Music</span></a
+            />LINE<br />Music</a
           >
         </li>
         <li>
@@ -490,7 +407,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=pandora.com"
               alt="Pandora"
-            /><span>Pandora</span></a
+            />Pandora</a
           >
         </li>
         <li>
@@ -500,7 +417,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=qobuz.com"
               alt="Qobuz"
-            /><span>Qobuz</span></a
+            />Qobuz</a
           >
         </li>
         <li>
@@ -510,7 +427,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=spotify.com"
               alt="Spotify"
-            /><span>Spotify</span></a
+            />Spotify</a
           >
         </li>
         <li>
@@ -518,7 +435,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=tidal.com"
               alt="TIDAL"
-            /><span>TIDAL</span></a
+            />TIDAL</a
           >
         </li>
         <li>
@@ -528,7 +445,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com"
               alt="YouTube Music"
-            /><span>YouTube<br />Music</span></a
+            />YouTube<br />Music</a
           >
         </li>
         <li>
@@ -536,7 +453,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com"
               alt="YouTube"
-            /><span>YouTube</span></a
+            />YouTube</a
           >
         </li>
       </ul>
