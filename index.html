@@ -45,14 +45,14 @@
         height: 60px;
         /* MODIFIED: Significantly increased drop-shadow for a very pronounced neon glow */
         filter: drop-shadow(0 0 25px var(--color-neon))
-          /* Intense, sharp glow */ drop_shadow(0 0 50px rgba(0, 255, 255, 0.5)); /* Wider, softer halo */
+          /* Intense, sharp glow */ drop-shadow(0 0 50px rgba(0, 255, 255, 0.5)); /* Wider, softer halo */
         transition: filter 0.3s ease;
       }
       /* Optional: enhance glow on logo hover */
       .logo a:hover img {
         /* MODIFIED: Even more intense glow on hover */
-        filter: drop_shadow(0 0 35px var(--color-neon))
-          drop_shadow(0 0 70px rgba(0, 255, 255, 0.8));
+        filter: drop-shadow(0 0 35px var(--color-neon))
+          drop-shadow(0 0 70px rgba(0, 255, 255, 0.8));
       }
       nav a {
         margin-left: 15px;
@@ -162,7 +162,7 @@
         margin-right: 0;
         /* CSS Filter to simulate neon glow and color on favicons */
         filter: brightness(1.5) contrast(1.2)
-          drop_shadow(0 0 4px var(--color-neon));
+          drop-shadow(0 0 4px var(--color-neon));
         transition: filter 0.3s ease;
       }
 
@@ -181,7 +181,7 @@
         /* Removed border */
         border: none;
         /* Subtle glow for normal state */
-        box-shadow: 0 0 5px rgba(0, 255, 255, 0.2); /* Soft, subtle neon glow */
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); /* Soft, subtle white glow */
 
         clip-path: inherit;
         -webkit-clip-path: inherit;
@@ -225,8 +225,8 @@
       .links li a:hover::before {
         background-color: transparent;
         border-color: transparent;
-        box-shadow: 0 0 0 3px var(--color-neon),
-          /* Crisp neon outline (if desired) */ 0 0 20px var(--color-neon); /* Stronger neon glow */
+        box-shadow: 0 0 0 3px #ffffff,
+          /* Crisp white outline (if desired) */ 0 0 20px #ffffff; /* Stronger white glow */
       }
 
       .links li a:hover::after {
