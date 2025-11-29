@@ -17,10 +17,9 @@
         --color-header-text: var(--color-neon); /* Neon text for header */
 
         /* UPDATED: Triangle and Text Colors for Black/Neon Theme */
-        --color-background-triangle: #1a1a1a; /* Very dark grey for better contrast against body #111111 */
+        --color-background-triangle: #001f3f; /* Deep navy blue for triangles */
         --color-text: var(--color-neon); /* Neon text on dark background */
-        --color-background-hover: #333333; /* Dark grey hover state */
-        --color-white-edge: #ffffff; /* White color for triangle edges */
+        --color-background-hover: #003366; /* Slightly lighter blue hover state */
       }
 
       /* --- BASE STYLES & LAYOUT --- */
@@ -28,7 +27,7 @@
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
-        /* CHANGE 1: Very dark background for the entire site */
+        /* Very dark background for the entire site */
         background-color: #111111;
         color: #cccccc; /* Light, but not neon color for general text */
         scroll-behavior: smooth;
@@ -37,42 +36,41 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 20px;
-        /* CHANGE 2: Black header background */
+        padding: 10px 20px;
         background-color: var(--color-header-bg);
-        /* Header glow retained */
-        box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
+        /* MODIFIED: Slight header glow, adjusted for better visibility */
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.7); /* Slightly stronger header glow */
       }
       .logo img {
-        height: 80px;
-        /* CHANGE: Neon glow around the logo */
-        filter: drop_shadow(0 0 10px var(--color-neon))
-          drop_shadow(0 0 20px rgba(0, 255, 255, 0.5));
-        transition: filter 0.3s ease; /* Smooth transition for glow */
+        height: 60px;
+        /* MODIFIED: Significantly increased drop-shadow for a very pronounced neon glow */
+        filter: drop-shadow(0 0 25px var(--color-neon))
+          /* Intense, sharp glow */ drop_shadow(0 0 50px rgba(0, 255, 255, 0.5)); /* Wider, softer halo */
+        transition: filter 0.3s ease;
       }
       /* Optional: enhance glow on logo hover */
       .logo a:hover img {
-        filter: drop_shadow(0 0 15px var(--color-neon))
-          drop_shadow(0 0 30px rgba(0, 255, 255, 0.7));
+        /* MODIFIED: Even more intense glow on hover */
+        filter: drop_shadow(0 0 35px var(--color-neon))
+          drop_shadow(0 0 70px rgba(0, 255, 255, 0.8));
       }
       nav a {
-        margin-left: 20px;
-        font-size: 24px;
-        /* CHANGE 3: Neon color for icons */
+        margin-left: 15px;
+        font-size: 20px;
         color: var(--color-header-text);
         text-decoration: none;
         transition: color 0.3s ease, text-shadow 0.3s ease;
-        /* CHANGE 4: Subtle neon glow */
+        /* Subtle neon glow for icons */
         text-shadow: 0 0 5px var(--color-neon);
       }
       nav a:hover {
-        color: #ffffff; /* White/light color on hover */
+        color: #ffffff;
         text-shadow: 0 0 8px #ffffff;
       }
       nav .nav-icon {
-        height: 24px;
-        width: 24px;
-        vertical-align: top;
+        width: auto;
+        height: 20px;
+        vertical-align: middle;
       }
       .links {
         padding: 20px;
@@ -95,7 +93,7 @@
         -webkit-animation: scroll-rtl 30s linear infinite;
         animation: scroll-rtl 30s linear infinite;
         font-size: 1.5em; /* Increased size for emphasis */
-        /* CHANGE 5: Neon glow for the scrolling text */
+        /* Neon glow for the scrolling text */
         text-shadow: 0 0 8px var(--color-neon);
       }
       @keyframes scroll-rtl {
@@ -133,7 +131,7 @@
         align-items: center;
         height: 60px;
         padding: 5px;
-        /* UPDATED: Dark background from CSS variable */
+        /* UPDATED: Dark blue background from CSS variable */
         background-color: var(--color-background-triangle);
         border-radius: 0;
         text-decoration: none;
@@ -152,8 +150,8 @@
         position: relative;
         overflow: hidden;
 
-        /* ОСНОВНАЯ ТЕНЬ: Только тень отбрасывания */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        /* Removed explicit box-shadow/filter from here */
+        box-shadow: none;
         filter: none;
       }
 
@@ -162,34 +160,38 @@
         width: 20px;
         height: 20px;
         margin-right: 0;
-        /* CHANGE 6: CSS Filter to simulate neon glow and color on favicons */
+        /* CSS Filter to simulate neon glow and color on favicons */
         filter: brightness(1.5) contrast(1.2)
           drop_shadow(0 0 4px var(--color-neon));
         transition: filter 0.3s ease;
       }
 
-      /* --- БЕЛЫЙ КОНТУР (::before) --- */
+      /* --- TRIANGLE EDGES (::before) - NOW FOR SUBTLE NEON GLOW/DEPTH --- */
       .links li a::before {
         content: "";
         position: absolute;
-        /* Расширяем для контура 2px */
-        left: -2px;
-        right: -2px;
-        top: -2px;
-        bottom: -2px;
+        /* Adjusted to be a subtle outer glow/shadow */
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
         pointer-events: none;
 
-        /* ЦВЕТ И ФОРМА: Белый фон и наследование формы */
-        background-color: var(--color-white-edge);
+        background-color: transparent;
+        /* Removed border */
+        border: none;
+        /* Subtle glow for normal state */
+        box-shadow: 0 0 5px rgba(0, 255, 255, 0.2); /* Soft, subtle neon glow */
+
         clip-path: inherit;
         -webkit-clip-path: inherit;
-        z-index: -1; /* Помещаем под основной треугольник */
+        z-index: -1; /* Place below the main triangle */
 
-        /* Переходы */
-        transition: background-color 0.4s ease, box-shadow 0.4s ease;
+        /* Transition for box-shadow */
+        transition: box-shadow 0.4s ease, background-color 0.4s ease;
       }
 
-      /* --- ВНУТРЕННИЙ ЭФФЕКТ (::after) --- */
+      /* --- INNER EFFECT (::after) --- */
       .links li a::after {
         content: "";
         position: absolute;
@@ -202,31 +204,29 @@
         opacity: 0;
         clip-path: inherit;
         -webkit-clip-path: inherit;
-        z-index: 1; /* Поверх белого контура, но под содержимым */
+        z-index: 1; /* Above any outer glow, but below content */
 
-        /* Внутренний свет и тень (эффект вдавливания) */
+        /* Inner light and shadow (inset effect) */
         box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.1),
-          /* Внутренний свет */ inset -2px -2px 5px rgba(0, 0, 0, 0.7); /* Внутренняя тень */
+          /* Inner light */ inset -2px -2px 5px rgba(0, 0, 0, 0.7); /* Inner shadow */
       }
 
       /* --- HOVER EFFECTS --- */
       .links li a:hover {
-        /* UPDATED: Darker grey hover background */
+        /* UPDATED: Lighter blue hover background */
         background-color: var(--color-background-hover);
-
-        /* Оставляем только тень отбрасывания */
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+        /* Removed explicit box-shadow from here */
+        box-shadow: none;
         filter: none;
-
         transform: translateZ(20px);
       }
 
-      /* АКТИВИРУЕМ НЕОНОВОЕ СВЕЧЕНИЕ НА КОНТУРЕ ПРИ НАВЕДЕНИИ */
+      /* ACTIVATE STRONGER NEON GLOW ON ::before UPON HOVER */
       .links li a:hover::before {
-        /* Меняем белый фон на прозрачный и добавляем неоновое свечение */
         background-color: transparent;
+        border-color: transparent;
         box-shadow: 0 0 0 3px var(--color-neon),
-          /* Четкий неоновый контур */ 0 0 15px var(--color-neon); /* Неоновое свечение */
+          /* Crisp neon outline (if desired) */ 0 0 20px var(--color-neon); /* Stronger neon glow */
       }
 
       .links li a:hover::after {
@@ -234,15 +234,15 @@
       }
 
       .links li a:active {
-        background-color: #111; /* Even darker on press */
-        box-shadow: none; /* Remove box-shadow on click for sinking effect */
+        background-color: #000d1a; /* Even darker blue on press */
+        box-shadow: none;
         filter: none;
         transform: translateZ(0) translateY(0);
       }
 
       .links li a:active::before {
-        /* При нажатии контур становится прозрачным или минимальным */
         background-color: transparent;
+        border-color: transparent;
         box-shadow: none;
       }
 
@@ -272,7 +272,7 @@
         flex-direction: column-reverse;
         justify-content: flex-start;
         padding-top: 1px;
-        /* UPDATED: Increased padding-bottom to 20px */
+        /* Increased padding-bottom to 20px */
         padding-bottom: 20px;
       }
       .links li:nth-child(even) a img {
@@ -298,16 +298,16 @@
         width: 40px;
         height: 40px;
         border-radius: 50%;
-        /* UPDATED: Black background for button */
+        /* Black background for button */
         background-color: #000000;
-        /* UPDATED: Neon border */
+        /* Neon border */
         border: 2px solid var(--color-neon);
         box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); /* Added glow to button */
         display: flex;
         justify-content: center;
         align-items: center;
         font-size: 20px;
-        /* UPDATED: Neon icon color */
+        /* Neon icon color */
         color: var(--color-neon);
         text-decoration: none;
         z-index: 10;
@@ -323,7 +323,7 @@
         margin-top: 50px;
       }
 
-      /* CHANGE 8: Top margin for the message form section (50px to separate from the top button) */
+      /* Top margin for the message form section (50px to separate from the top button) */
       #contact.contact {
         margin-top: 50px;
       }
@@ -336,7 +336,7 @@
       .contact textarea {
         padding: 10px;
         margin-top: 5px;
-        /* UPDATED: Black background, Neon border, Neon text */
+        /* Black background, Neon border, Neon text */
         background-color: #000000;
         color: var(--color-neon);
         border: 1px solid var(--color-neon);
@@ -351,12 +351,12 @@
         margin-top: 20px;
         padding: 8px 15px;
         background-color: #000000;
-        /* UPDATED: Neon text color */
+        /* Neon text color */
         color: var(--color-neon);
         border: none;
         border-radius: 20px;
         cursor: pointer;
-        /* CHANGE 7: Neon glow for the button in normal state */
+        /* Neon glow for the button in normal state */
         box-shadow: 0 0 8px var(--color-neon); /* Increased glow */
         transition: all 0.2s ease;
         align-self: center;
@@ -364,7 +364,7 @@
       }
       .contact button:hover {
         background-color: #333;
-        /* UPDATED: Add stronger neon glow on hover */
+        /* Add stronger neon glow on hover */
         box-shadow: 0 0 20px var(--color-neon); /* Stronger hover glow */
       }
       .contact button:active {
