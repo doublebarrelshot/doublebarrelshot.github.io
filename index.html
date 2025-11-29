@@ -17,10 +17,10 @@
         --color-header-text: var(--color-neon); /* Neon text for header */
 
         /* UPDATED: Triangle and Text Colors for Black/Neon Theme */
-        /* ADJUSTMENT: Change from pure black to very dark grey for better contrast against body #111111 */
-        --color-background-triangle: #1a1a1a;
+        --color-background-triangle: #1a1a1a; /* Very dark grey for better contrast against body #111111 */
         --color-text: var(--color-neon); /* Neon text on dark background */
         --color-background-hover: #333333; /* Dark grey hover state */
+        --color-white-edge: #ffffff; /* White color for triangle edges */
       }
 
       /* --- BASE STYLES & LAYOUT --- */
@@ -46,14 +46,14 @@
       .logo img {
         height: 80px;
         /* CHANGE: Neon glow around the logo */
-        filter: drop-shadow(0 0 10px var(--color-neon))
-          drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+        filter: drop_shadow(0 0 10px var(--color-neon))
+          drop_shadow(0 0 20px rgba(0, 255, 255, 0.5));
         transition: filter 0.3s ease; /* Smooth transition for glow */
       }
       /* Optional: enhance glow on logo hover */
       .logo a:hover img {
-        filter: drop-shadow(0 0 15px var(--color-neon))
-          drop-shadow(0 0 30px rgba(0, 255, 255, 0.7));
+        filter: drop_shadow(0 0 15px var(--color-neon))
+          drop_shadow(0 0 30px rgba(0, 255, 255, 0.7));
       }
       nav a {
         margin-left: 20px;
@@ -133,7 +133,7 @@
         align-items: center;
         height: 60px;
         padding: 5px;
-        /* UPDATED: Dark background from CSS variable (was pure black) */
+        /* UPDATED: Dark background from CSS variable */
         background-color: var(--color-background-triangle);
         border-radius: 0;
         text-decoration: none;
@@ -148,30 +148,48 @@
         /* 3D and Transition */
         transform-style: preserve-3d;
         transform: translateZ(0);
-        transition: transform 0.4s ease, box-shadow 0.4s ease,
-          background-color 0.3s ease;
+        transition: transform 0.4s ease, background-color 0.3s ease;
         position: relative;
         overflow: hidden;
 
-        /* Neon Border (Normal State) - INCREASED VISIBILITY */
-        box-shadow: 0 0 0 1px var(--color-neon),
-          /* Solid, thin neon border */ 0 0 5px rgba(0, 255, 255, 0.4),
-          /* Soft glow around the whole shape */ 0 2px 4px rgba(0, 0, 0, 0.5); /* Soft drop shadow */
+        /* ОСНОВНАЯ ТЕНЬ: Только тень отбрасывания */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        filter: none;
       }
 
-      /* Force icons to be visible against black background */
+      /* Force icons to be visible against dark background */
       .links li a img {
         width: 20px;
         height: 20px;
         margin-right: 0;
         /* CHANGE 6: CSS Filter to simulate neon glow and color on favicons */
         filter: brightness(1.5) contrast(1.2)
-          drop-shadow(0 0 4px var(--color-neon));
+          drop_shadow(0 0 4px var(--color-neon));
         transition: filter 0.3s ease;
       }
 
-      /* --- INNER SUNKEN EFFECT (Pseudo-elements) --- */
-      .links li a::before,
+      /* --- БЕЛЫЙ КОНТУР (::before) --- */
+      .links li a::before {
+        content: "";
+        position: absolute;
+        /* Расширяем для контура 2px */
+        left: -2px;
+        right: -2px;
+        top: -2px;
+        bottom: -2px;
+        pointer-events: none;
+
+        /* ЦВЕТ И ФОРМА: Белый фон и наследование формы */
+        background-color: var(--color-white-edge);
+        clip-path: inherit;
+        -webkit-clip-path: inherit;
+        z-index: -1; /* Помещаем под основной треугольник */
+
+        /* Переходы */
+        transition: background-color 0.4s ease, box-shadow 0.4s ease;
+      }
+
+      /* --- ВНУТРЕННИЙ ЭФФЕКТ (::after) --- */
       .links li a::after {
         content: "";
         position: absolute;
@@ -184,12 +202,11 @@
         opacity: 0;
         clip-path: inherit;
         -webkit-clip-path: inherit;
-      }
-      .links li a::before {
-        box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.1); /* Adjusted inner shadow for dark background */
-      }
-      .links li a::after {
-        box-shadow: inset -2px -2px 5px rgba(0, 0, 0, 0.7); /* Adjusted inner highlight for dark background */
+        z-index: 1; /* Поверх белого контура, но под содержимым */
+
+        /* Внутренний свет и тень (эффект вдавливания) */
+        box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.1),
+          /* Внутренний свет */ inset -2px -2px 5px rgba(0, 0, 0, 0.7); /* Внутренняя тень */
       }
 
       /* --- HOVER EFFECTS --- */
@@ -197,27 +214,38 @@
         /* UPDATED: Darker grey hover background */
         background-color: var(--color-background-hover);
 
-        /* Neon Border (Hover State) - Stronger Thicker Sides */
-        box-shadow: 0 0 0 3px var(--color-neon),
-          /* Overall visible neon border */ 0 0 15px var(--color-neon),
-          /* Stronger overall glow */ 0 10px 20px rgba(0, 0, 0, 0.8); /* Stronger drop shadow on black */
+        /* Оставляем только тень отбрасывания */
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+        filter: none;
 
         transform: translateZ(20px);
       }
-      .links li a:hover::before,
+
+      /* АКТИВИРУЕМ НЕОНОВОЕ СВЕЧЕНИЕ НА КОНТУРЕ ПРИ НАВЕДЕНИИ */
+      .links li a:hover::before {
+        /* Меняем белый фон на прозрачный и добавляем неоновое свечение */
+        background-color: transparent;
+        box-shadow: 0 0 0 3px var(--color-neon),
+          /* Четкий неоновый контур */ 0 0 15px var(--color-neon); /* Неоновое свечение */
+      }
+
       .links li a:hover::after {
         opacity: 1; /* Activate inner shadow on hover */
       }
-      .links li a:hover img,
-      .links li a:hover span {
-        transform: translateZ(-10px); /* Push inner content in */
-      }
+
       .links li a:active {
         background-color: #111; /* Even darker on press */
         box-shadow: none; /* Remove box-shadow on click for sinking effect */
+        filter: none;
         transform: translateZ(0) translateY(0);
       }
-      .links li a:active::before,
+
+      .links li a:active::before {
+        /* При нажатии контур становится прозрачным или минимальным */
+        background-color: transparent;
+        box-shadow: none;
+      }
+
       .links li a:active::after {
         opacity: 0; /* Deactivate inner shadow on active */
       }
