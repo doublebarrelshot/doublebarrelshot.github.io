@@ -13,8 +13,8 @@
       /* --- CSS Variables for Easy Customization --- */
       :root {
         --color-neon: #00ffff; /* Neon Blue */
-        --color-header-bg: var(--color-neon);
-        --color-header-text: #ffffff;
+        --color-header-bg: #000000; /* Чёрный фон для шапки */
+        --color-header-text: var(--color-neon); /* Неоновый текст для шапки */
 
         /* UPDATED: Triangle and Text Colors for Black/Neon Theme */
         --color-background-triangle: #000000; /* Black background for triangles */
@@ -27,8 +27,9 @@
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
-        background-color: #f4f4f4;
-        color: #333;
+        /* ИЗМЕНЕНИЕ 1: Очень темный фон для всего сайта */
+        background-color: #111111;
+        color: #cccccc; /* Светлый, но не неоновый цвет для общего текста */
         scroll-behavior: smooth;
       }
       header {
@@ -36,21 +37,36 @@
         justify-content: space-between;
         align-items: center;
         padding: 20px;
+        /* ИЗМЕНЕНИЕ 2: Чёрный фон шапки */
         background-color: var(--color-header-bg);
+        /* Свечение шапки сохранено */
         box-shadow: 0 0 10px rgba(0, 255, 255, 0.7);
       }
       .logo img {
         height: 80px;
+        /* ИЗМЕНЕНИЕ: Неоновое свечение вокруг логотипа */
+        filter: drop-shadow(0 0 10px var(--color-neon))
+          drop-shadow(0 0 20px rgba(0, 255, 255, 0.5));
+        transition: filter 0.3s ease; /* Плавный переход для свечения */
+      }
+      /* Опционально: усилить свечение при наведении на логотип */
+      .logo a:hover img {
+        filter: drop-shadow(0 0 15px var(--color-neon))
+          drop-shadow(0 0 30px rgba(0, 255, 255, 0.7));
       }
       nav a {
         margin-left: 20px;
         font-size: 24px;
+        /* ИЗМЕНЕНИЕ 3: Неоновый цвет иконок */
         color: var(--color-header-text);
         text-decoration: none;
-        transition: color 0.3s ease;
+        transition: color 0.3s ease, text-shadow 0.3s ease;
+        /* ИЗМЕНЕНИЕ 4: Тонкое неоновое свечение */
+        text-shadow: 0 0 5px var(--color-neon);
       }
       nav a:hover {
-        color: #333333;
+        color: #ffffff; /* Белый/светлый цвет на ховере */
+        text-shadow: 0 0 8px #ffffff;
       }
       nav .nav-icon {
         height: 24px;
@@ -70,13 +86,16 @@
         padding: 0;
         margin: 0 auto;
         width: 100%;
+        color: var(--color-neon);
       }
       .scrolling-container .scrolling-content {
         display: inline-block;
         padding-left: 100%;
         -webkit-animation: scroll-rtl 30s linear infinite;
         animation: scroll-rtl 30s linear infinite;
-        font-size: 1em;
+        font-size: 1.5em; /* Увеличен размер для акцента */
+        /* ИЗМЕНЕНИЕ 5: Неоновое свечение для скроллящегося текста */
+        text-shadow: 0 0 8px var(--color-neon);
       }
       @keyframes scroll-rtl {
         0% {
@@ -128,7 +147,8 @@
         /* 3D and Transition */
         transform-style: preserve-3d;
         transform: translateZ(0);
-        transition: transform 0.4s ease, box-shadow 0.4s ease;
+        transition: transform 0.4s ease, box-shadow 0.4s ease,
+          background-color 0.3s ease;
         position: relative;
         overflow: hidden;
 
@@ -144,6 +164,10 @@
         width: 20px;
         height: 20px;
         margin-right: 0;
+        /* ИЗМЕНЕНИЕ 6: CSS Filter для имитации неонового свечения и цвета на фавиконах */
+        filter: brightness(1.5) contrast(1.2)
+          drop-shadow(0 0 4px var(--color-neon));
+        transition: filter 0.3s ease;
       }
 
       /* --- INNER SUNKEN EFFECT (Pseudo-elements) --- */
@@ -190,6 +214,7 @@
         transform: translateZ(-10px); /* Push inner content in */
       }
       .links li a:active {
+        background-color: #111; /* Еще темнее при нажатии */
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         transform: translateZ(0) translateY(0);
       }
@@ -269,6 +294,12 @@
       .contact .scrolling-container {
         margin-top: 50px;
       }
+
+      /* НОВОЕ ИЗМЕНЕНИЕ 8: Отступ сверху для секции с формой сообщения */
+      #contact.contact {
+        margin-top: 50px;
+      }
+
       .contact form {
         display: flex;
         flex-direction: column;
@@ -297,15 +328,16 @@
         border: none;
         border-radius: 20px;
         cursor: pointer;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        /* ИЗМЕНЕНИЕ 7: Неоновое свечение кнопки в нормальном состоянии */
+        box-shadow: 0 0 5px var(--color-neon);
         transition: all 0.2s ease;
         align-self: center;
         font-size: 16px;
       }
       .contact button:hover {
         background-color: #333;
-        /* UPDATED: Add neon glow on hover */
-        box-shadow: 0 0 10px var(--color-neon);
+        /* UPDATED: Add stronger neon glow on hover */
+        box-shadow: 0 0 15px var(--color-neon);
       }
       .contact button:active {
         box-shadow: none;
@@ -387,7 +419,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=apple.com"
               alt="Apple Music/iTunes"
-            /><span>Apple<br />Music/iTunes</span></a
+            /><span>Apple Music/iTunes</span></a
           >
         </li>
         <li>
@@ -423,7 +455,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=iheart.com"
               alt="iHeartRadio"
-            /><span>iHeart<br />Radio</span></a
+            /><span>iHeart Radio</span></a
           >
         </li>
         <li>
@@ -451,7 +483,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=line.me"
               alt="LINE Music"
-            /><span>LINE<br />Music</span></a
+            /><span>LINE Music</span></a
           >
         </li>
         <li>
@@ -499,7 +531,7 @@
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=youtube.com"
               alt="YouTube Music"
-            /><span>YouTube<br />Music</span></a
+            /><span>YouTube Music</span></a
           >
         </li>
         <li>
