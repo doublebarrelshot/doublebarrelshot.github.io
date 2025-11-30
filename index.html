@@ -32,15 +32,6 @@
         color: #cccccc; /* Light, but not neon color for general text */
         scroll-behavior: smooth;
       }
-      header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px 20px;
-        background-color: var(--color-header-bg);
-        /* MODIFIED: Slight header glow, adjusted for better visibility */
-        box-shadow: 0 0 15px rgba(0, 255, 255, 0.7); /* Slightly stronger header glow */
-      }
       .logo img {
         height: 60px;
         /* MODIFIED: Significantly increased drop-shadow for a very pronounced neon glow */
@@ -54,9 +45,23 @@
         filter: drop-shadow(0 0 35px var(--color-neon))
           drop-shadow(0 0 70px rgba(0, 255, 255, 0.8));
       }
+      nav {
+        position: fixed;
+        right: 0;
+        top: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: var(--color-header-bg);
+        width: 60px;
+        box-shadow: -5px 0 15px rgba(0, 255, 255, 0.3);
+        z-index: 1000;
+      }
       nav a {
-        margin-left: 15px;
-        font-size: 20px;
+        margin: 20px 0;
+        font-size: 24px;
         color: var(--color-header-text);
         text-decoration: none;
         transition: color 0.3s ease, text-shadow 0.3s ease;
@@ -69,11 +74,11 @@
       }
       nav .nav-icon {
         width: auto;
-        height: 20px;
+        height: 24px;
         vertical-align: middle;
       }
       .links {
-        padding: 20px;
+        padding: 20px 80px 20px 20px;
         max-width: 1200px;
         margin: 0 auto;
       }
@@ -285,7 +290,7 @@
 
       /* --- CONTACT SECTION & SCROLL BUTTON --- */
       .contact {
-        padding: 20px;
+        padding: 20px 80px 20px 20px;
         max-width: 600px;
         margin: 0 auto;
         position: relative;
@@ -374,7 +379,7 @@
     </style>
   </head>
   <body id="top">
-    <header>
+    <nav>
       <div class="logo">
         <a
           href="https://open.spotify.com/artist/4R6fu0Zztw59xHFNUDqBD0"
@@ -383,29 +388,30 @@
           <img src="doublebarrelshot.png" alt="doublebarrelshot Logo" />
         </a>
       </div>
-      <nav>
-        <a
-          href="https://open.spotify.com/artist/4R6fu0Zztw59xHFNUDqBD0"
-          target="_blank"
-          ><i class="fab fa-spotify"></i
-        ></a>
+      <a
+        href="https://open.spotify.com/artist/4R6fu0Zztw59xHFNUDqBD0"
+        target="_blank"
+        ><i class="fab fa-spotify"></i
+      ></a>
 
-        <a href="https://unitedmasters.com/a/doublebarrelshot" target="_blank">
-          <img src="um_logo.png" alt="UnitedMasters" class="nav-icon" />
-        </a>
+      <a href="https://unitedmasters.com/a/doublebarrelshot" target="_blank">
+        <img src="um_logo.png" alt="UnitedMasters" class="nav-icon" />
+      </a>
 
-        <a href="https://www.youtube.com/@doublebarrelshot" target="_blank"
-          ><i class="fab fa-youtube"></i
-        ></a>
-        <a href="https://www.instagram.com/doublebarrelshot/" target="_blank"
-          ><i class="fab fa-instagram"></i
-        ></a>
+      <a href="https://www.youtube.com/@doublebarrelshot" target="_blank"
+        ><i class="fab fa-youtube"></i
+      ></a>
+      <a href="https://www.instagram.com/doublebarrelshot/" target="_blank"
+        ><i class="fab fa-instagram"></i
+      ></a>
+      <a href="https://www.tiktok.com/@doublebarrelshotofficial" target="_blank"
+        ><i class="fab fa-tiktok"></i
+      ></a>
 
-        <a href="#contact" onclick="focusMessage(); return true;"
-          ><i class="fas fa-envelope"></i
-        ></a>
-      </nav>
-    </header>
+      <a href="#contact" onclick="focusMessage(); return true;"
+        ><i class="fas fa-envelope"></i
+      ></a>
+    </nav>
 
     <section class="links">
       <h2 class="scrolling-container">
@@ -550,6 +556,14 @@
               src="https://www.google.com/s2/favicons?sz=64&domain=tidal.com"
               alt="TIDAL"
             /><span>TIDAL</span></a
+          >
+        </li>
+        <li>
+          <a href="https://tiktok.com/@doublebarrelshotofficial" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=tiktok.com"
+              alt="TIDAL"
+            /><span>TikTok</span></a
           >
         </li>
         <li>
