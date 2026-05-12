@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -64,7 +64,9 @@
         font-size: 24px;
         color: var(--color-header-text);
         text-decoration: none;
-        transition: color 0.3s ease, text-shadow 0.3s ease;
+        transition:
+          color 0.3s ease,
+          text-shadow 0.3s ease;
         /* Subtle neon glow for icons */
         text-shadow: 0 0 5px var(--color-neon);
       }
@@ -151,7 +153,9 @@
         /* 3D and Transition */
         transform-style: preserve-3d;
         transform: translateZ(0);
-        transition: transform 0.4s ease, background-color 0.3s ease;
+        transition:
+          transform 0.4s ease,
+          background-color 0.3s ease;
         position: relative;
         overflow: hidden;
 
@@ -193,7 +197,9 @@
         z-index: -1; /* Place below the main triangle */
 
         /* Transition for box-shadow */
-        transition: box-shadow 0.4s ease, background-color 0.4s ease;
+        transition:
+          box-shadow 0.4s ease,
+          background-color 0.4s ease;
       }
 
       /* --- INNER EFFECT (::after) --- */
@@ -212,7 +218,8 @@
         z-index: 1; /* Above any outer glow, but below content */
 
         /* Inner light and shadow (inset effect) */
-        box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.1),
+        box-shadow:
+          inset 2px 2px 5px rgba(255, 255, 255, 0.1),
           /* Inner light */ inset -2px -2px 5px rgba(0, 0, 0, 0.7); /* Inner shadow */
       }
 
@@ -230,7 +237,8 @@
       .links li a:hover::before {
         background-color: transparent;
         border-color: transparent;
-        box-shadow: 0 0 0 3px #ffffff,
+        box-shadow:
+          0 0 0 3px #ffffff,
           /* Crisp white outline (if desired) */ 0 0 20px #ffffff; /* Stronger white glow */
       }
 
@@ -388,6 +396,9 @@
           <img src="doublebarrelshot.png" alt="doublebarrelshot Logo" />
         </a>
       </div>
+      <a href="https://genius.com/artists/Doublebarrelshot" target="_blank">
+        <img src="genius.png" alt="Genius" class="nav-icon" />
+      </a>
       <a
         href="https://open.spotify.com/artist/4R6fu0Zztw59xHFNUDqBD0"
         target="_blank"
@@ -408,7 +419,12 @@
         ><i class="fab fa-tiktok"></i
       ></a>
 
-      <a href="#contact" onclick="focusMessage(); return true;"
+      <a
+        href="#contact"
+        onclick="
+          focusMessage();
+          return true;
+        "
         ><i class="fas fa-envelope"></i
       ></a>
     </nav>
@@ -480,6 +496,14 @@
               src="https://www.google.com/s2/favicons?sz=64&domain=music-flo.com"
               alt="Flo"
             /><span>Flo</span></a
+          >
+        </li>
+        <li>
+          <a href="https://genius.com/artists/Doublebarrelshot" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=genius.com"
+              alt="Genius"
+            /><span>Genius</span></a
           >
         </li>
         <li>
@@ -594,7 +618,7 @@
     </section>
 
     <section id="contact" class="contact">
-      <form onsubmit="handleMailto(event);">
+      <form onsubmit="handleMailto(event)">
         <textarea
           id="message"
           name="body"
