@@ -875,6 +875,9 @@
       // пропадать молча — запоминаем намерение и выполним при готовности
       var playerReady = false;
       var pendingArrowAction = null;
+      // true, когда YouTube признан недоступным (вотчдог/блокировка, напр.
+      // РФ без VPN) — тогда «дальше» выдаёт случайную песню, а не видео
+      var ytUnusable = false;
 
       // Закрыть fallback-панель с обложкой/песней (иначе она остаётся
       // поверх плеера и стрелки выглядят неработающими)
@@ -929,6 +932,10 @@
       }
 
       function prevVideo() {
+        if (ytUnusable) {
+          prevFallbackTrack();
+          return;
+        }
         if (!playerReady || !ytPlayer || !ytPlayer.getVideoData) {
           pendingArrowAction = prevVideo;
           return;
@@ -945,6 +952,10 @@
       }
 
       function nextVideo() {
+        if (ytUnusable) {
+          resumeYouTube();
+          return;
+        }
         if (!playerReady || !ytPlayer || !ytPlayer.getVideoData) {
           pendingArrowAction = nextVideo;
           return;
@@ -1027,6 +1038,7 @@
               }
               if (e.data === YT.PlayerState.PLAYING) {
                 errorStreak = 0;
+                ytUnusable = false;
                 clearTimeout(ytWatchdogTimer);
                 rememberInHistory();
               }
@@ -1118,10 +1130,87 @@
         requestAnimationFrame(fitPlayerWindow);
       }
 
+      // === РАДИО-РЕЖИМ ДЛЯ НЕДОСТУПНОГО YOUTUBE ===
+      // История прослушанных fallback-треков — для стрелки «назад»
+      var fallbackHistory = [];
+      var fallbackPos = -1;
+
+      function renderFallbackTrack(track) {
+        if (track.type === "audiomack") {
+          showFallback(track.title, "Audiomack: полная песня", null);
+          playAudiomack(track.song);
+        } else {
+          showFallback(track.title, "iTunes: 30-секундное превью", track.cover);
+          playItunesTrack(track);
+        }
+      }
+
+      function playFallbackTrack(track) {
+        if (!afBox) afInit();
+        fallbackHistory = fallbackHistory.slice(0, fallbackPos + 1);
+        fallbackHistory.push(track);
+        fallbackPos = fallbackHistory.length - 1;
+        renderFallbackTrack(track);
+      }
+
+      function prevFallbackTrack() {
+        if (fallbackPos > 0) {
+          fallbackPos--;
+          renderFallbackTrack(fallbackHistory[fallbackPos]);
+        } else if (afAudio && !afAudio.hidden) {
+          try {
+            afAudio.currentTime = 0;
+            afAudio.play();
+          } catch (e) {}
+        }
+      }
+
+      // Случайный трек из каталога артиста на iTunes; если каталог
+      // недоступен — случайная полная песня с Audiomack
+      function itunesRandomTrack() {
+        return jsonp(
+          "https://itunes.apple.com/search?term=" +
+            encodeURIComponent("doublebarrelshot") +
+            "&entity=song&limit=25"
+        ).then(function (data) {
+          var results = (data && data.results) || [];
+          var pool = results.filter(function (r) {
+            return r.previewUrl && /doublebarrelshot/i.test(r.artistName || "");
+          });
+          if (!pool.length)
+            pool = results.filter(function (r) {
+              return r.previewUrl;
+            });
+          if (!pool.length) throw new Error("itunes empty");
+          var track = pool[rnd(pool.length)];
+          return {
+            title: track.trackName,
+            cover: (track.artworkUrl100 || "").replace("100x100", "600x600"),
+            audio: track.previewUrl,
+          };
+        });
+      }
+
+      function playRandomFallbackTrack() {
+        if (!afBox) afInit();
+        itunesRandomTrack()
+          .then(playFallbackTrack)
+          .catch(function () {
+            var s = AUDIOMACK_SONGS[rnd(AUDIOMACK_SONGS.length)];
+            playFallbackTrack({ type: "audiomack", title: s.title, song: s });
+          });
+      }
+
+      // Дальше: плеер жив — случайное видео; YouTube недоступен (напр.,
+      // РФ без VPN) — случайная песня из бесплатных источников
       function resumeYouTube() {
         if (!afBox) afInit();
-        closeFallbackBox();
-        playRandom();
+        if (ytUnusable) {
+          playRandomFallbackTrack();
+        } else {
+          closeFallbackBox();
+          playRandom();
+        }
       }
 
       // JSONP-запрос (iTunes/Deezer отдают данные без ключа именно так)
@@ -1253,6 +1342,7 @@
         } catch (e) {}
         // 1 — играет, 3 — буферизуется, 5 — запужено и ждёт клика: это норма
         if (st === 1 || st === 3 || st === 5) return;
+        ytUnusable = true;
         handlePlaybackError();
       }
       var ytWatchdogTimer = setTimeout(ytWatchdog, 15000);
