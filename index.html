@@ -296,6 +296,40 @@
         transform: translateZ(20px) rotateX(5deg) translateY(-5px);
       }
 
+      /* --- TICKER BAR: стрелки предыдущее/следующее видео --- */
+      .ticker-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 0 5px;
+        color: var(--color-neon);
+      }
+      .ticker-bar .scrolling-container {
+        flex: 1;
+        width: auto;
+        margin: 0;
+      }
+      .ticker-btn {
+        flex: 0 0 auto;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #000000;
+        color: var(--color-neon);
+        border: 2px solid var(--color-neon);
+        cursor: pointer;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+      .ticker-btn:hover {
+        background: var(--color-neon);
+        color: #000000;
+      }
+
       /* --- RANDOM YOUTUBE PLAYER WINDOW --- */
       .player-window {
         position: relative;
@@ -509,9 +543,29 @@
     </nav>
 
     <section class="links">
-      <h2 class="scrolling-container">
-        <span class="scrolling-content">doublebarrelshot</span>
-      </h2>
+      <div class="ticker-bar">
+        <button
+          id="prev-video"
+          class="ticker-btn"
+          type="button"
+          title="Предыдущее видео"
+          aria-label="Предыдущее видео"
+        >
+          <i class="fas fa-step-backward"></i>
+        </button>
+        <h2 class="scrolling-container">
+          <span class="scrolling-content">doublebarrelshot</span>
+        </h2>
+        <button
+          id="next-video"
+          class="ticker-btn"
+          type="button"
+          title="Следующее видео"
+          aria-label="Следующее видео"
+        >
+          <i class="fas fa-step-forward"></i>
+        </button>
+      </div>
       <div class="player-window">
         <div id="yt-player"></div>
         <div id="audio-fallback" class="audio-fallback" hidden>
@@ -648,12 +702,30 @@
         </li>
         <li>
           <a
+            href="https://y.qq.com/n/ryqq/singer/002XB9cN0CFLbt"
+            target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=y.qq.com"
+              alt="QQ Music"
+            /><span>QQ Music</span></a
+          >
+        </li>
+        <li>
+          <a
             href="https://www.qobuz.com/us-en/interpreter/doublebarrelshot/29153724"
             target="_blank"
             ><img
               src="https://www.google.com/s2/favicons?sz=64&domain=qobuz.com"
               alt="Qobuz"
             /><span>Qobuz</span></a
+          >
+        </li>
+        <li>
+          <a href="https://soundcloud.com/doublebarrelshot" target="_blank"
+            ><img
+              src="https://www.google.com/s2/favicons?sz=64&domain=soundcloud.com"
+              alt="SoundCloud"
+            /><span>SoundCloud</span></a
           >
         </li>
         <li>
@@ -769,6 +841,41 @@
       var pendingRandomJump = false;
       var errorStreak = 0;
 
+      // История просмотренных видео для стрелок «предыдущее/следующее»
+      var playHistory = [];
+      var historyPos = -1;
+
+      function rememberInHistory() {
+        var vid = ytPlayer.getVideoData().video_id;
+        if (!vid) return;
+        if (playHistory[historyPos] === vid) return; // повторно играет то же
+        playHistory = playHistory.slice(0, historyPos + 1);
+        playHistory.push(vid);
+        historyPos = playHistory.length - 1;
+      }
+
+      function prevVideo() {
+        if (!ytPlayer || !ytPlayer.getVideoData) return;
+        if (historyPos > 0) {
+          historyPos--;
+          ytPlayer.loadVideoById(playHistory[historyPos]);
+        } else {
+          // в начале истории — перематываем текущее к началу
+          ytPlayer.seekTo(0, true);
+          ytPlayer.playVideo();
+        }
+      }
+
+      function nextVideo() {
+        if (!ytPlayer || !ytPlayer.getVideoData) return;
+        if (historyPos < playHistory.length - 1) {
+          historyPos++;
+          ytPlayer.loadVideoById(playHistory[historyPos]);
+        } else {
+          playRandom();
+        }
+      }
+
       function rnd(n) {
         return Math.floor(Math.random() * n);
       }
@@ -838,6 +945,7 @@
               }
               if (e.data === YT.PlayerState.PLAYING) {
                 errorStreak = 0;
+                rememberInHistory();
               }
             },
             onError: function () {
@@ -1259,6 +1367,14 @@
           console.info("Ссылка скрыта как недоступная:", url);
         });
       }
+
+      // Стрелки «предыдущее/следующее» в бегущей строке
+      document
+        .getElementById("prev-video")
+        .addEventListener("click", prevVideo);
+      document
+        .getElementById("next-video")
+        .addEventListener("click", nextVideo);
 
       var ytApiScript = document.createElement("script");
       ytApiScript.src = "https://www.youtube.com/iframe_api";
