@@ -329,6 +329,10 @@
         background: var(--color-neon);
         color: #000000;
       }
+      /* Явный отклик на нажатие — видно, что клик зарегистрирован */
+      .ticker-btn:active {
+        transform: scale(0.88);
+      }
 
       /* --- RANDOM YOUTUBE PLAYER WINDOW --- */
       .player-window {
@@ -844,6 +848,23 @@
       var playHistory = [];
       var historyPos = -1;
 
+      // Клик по стрелке до готовности плеера (медленная сеть) не должен
+      // пропадать молча — запоминаем намерение и выполним при готовности
+      var playerReady = false;
+      var pendingArrowAction = null;
+
+      // Закрыть fallback-панель с обложкой/песней (иначе она остаётся
+      // поверх плеера и стрелки выглядят неработающими)
+      function closeFallbackBox() {
+        if (!afBox) return;
+        try {
+          afAudio.pause();
+        } catch (e) {}
+        afBox.hidden = true;
+        afCover.removeAttribute("src");
+        afEmbedHolder.innerHTML = "";
+      }
+
       function rememberInHistory() {
         var vid = ytPlayer.getVideoData().video_id;
         if (!vid) return;
@@ -854,7 +875,11 @@
       }
 
       function prevVideo() {
-        if (!ytPlayer || !ytPlayer.getVideoData) return;
+        if (!playerReady || !ytPlayer || !ytPlayer.getVideoData) {
+          pendingArrowAction = prevVideo;
+          return;
+        }
+        closeFallbackBox();
         if (historyPos > 0) {
           historyPos--;
           ytPlayer.loadVideoById(playHistory[historyPos]);
@@ -866,7 +891,11 @@
       }
 
       function nextVideo() {
-        if (!ytPlayer || !ytPlayer.getVideoData) return;
+        if (!playerReady || !ytPlayer || !ytPlayer.getVideoData) {
+          pendingArrowAction = nextVideo;
+          return;
+        }
+        closeFallbackBox();
         if (historyPos < playHistory.length - 1) {
           historyPos++;
           ytPlayer.loadVideoById(playHistory[historyPos]);
@@ -920,6 +949,14 @@
           },
           events: {
             onReady: function (e) {
+              playerReady = true;
+              // Стрелку нажали ещё до готовности плеера — выполняем теперь
+              if (pendingArrowAction) {
+                var action = pendingArrowAction;
+                pendingArrowAction = null;
+                action();
+                return;
+              }
               // Случайный канал и случайный стартовый ролик (ожидает нажатия Play)
               currentChannel = rnd(CHANNEL_PLAYLISTS.length);
               e.target.cuePlaylist({
@@ -1003,12 +1040,8 @@
       }
 
       function resumeYouTube() {
-        try {
-          afAudio.pause();
-        } catch (e) {}
-        afBox.hidden = true;
-        afCover.removeAttribute("src");
-        afEmbedHolder.innerHTML = "";
+        if (!afBox) afInit();
+        closeFallbackBox();
         playRandom();
       }
 
