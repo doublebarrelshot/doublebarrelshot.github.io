@@ -1069,6 +1069,197 @@
           });
       }
 
+      // === ПРОВЕРКА ЖИВОСТИ ССЫЛОК (запускается параллельно с плеером) ===
+      // CORS не позволяет читать коды ответов чужих сайтов, поэтому:
+      // 1) где у платформы есть открытый oEmbed/JSONP-API — проверяем
+      //    существование страницы артиста по-настоящему (точная проверка);
+      // 2) YouTube-ссылки проверяем фактом загрузки плейлистов каналов
+      //    самим плеером (no-cors fetch страницы канала YouTube отвергает);
+      // 3) остальные — no-cors fetch: отвечает ли домен вообще (ловит
+      //    мёртвые домены и обрывы сети; статус/гео-блок так не увидеть).
+      // Предохранитель: если недоступных больше LINK_HIDE_LIMIT — считаем
+      // это сбоем сети у зрителя и ничего не скрываем.
+      var LINK_CHECK_START_MS = 1500; // даём странице прогрузиться
+      var LINK_CHECK_DELAY_MS = 250; // разброс старта, чтобы не грузить сеть
+      var LINK_CHECK_TIMEOUT_MS = 8000;
+      var LINK_HIDE_LIMIT = 5;
+
+      function delay(ms) {
+        return new Promise(function (resolve) {
+          setTimeout(resolve, ms);
+        });
+      }
+
+      function fetchWithTimeout(url, options, timeoutMs) {
+        return new Promise(function (resolve, reject) {
+          var ctl = new AbortController();
+          var timer = setTimeout(function () {
+            ctl.abort();
+          }, timeoutMs || LINK_CHECK_TIMEOUT_MS);
+          options = options || {};
+          options.signal = ctl.signal;
+          fetch(url, options).then(
+            function (r) {
+              clearTimeout(timer);
+              resolve(r);
+            },
+            function (e) {
+              clearTimeout(timer);
+              reject(e);
+            }
+          );
+        });
+      }
+
+      function attemptNoCors(url) {
+        return fetchWithTimeout(url, {
+          mode: "no-cors",
+          redirect: "follow",
+          cache: "no-store",
+        })
+          .then(function () {
+            return true;
+          })
+          .catch(function () {
+            return false;
+          });
+      }
+
+      // Три попытки вразнобой: мгновенный сбой сети или «холодный старт»
+      // страницы не должен привести к скрытию живой ссылки
+      function linkAliveGeneric(url) {
+        return attemptNoCors(url).then(function (ok) {
+          if (ok) return true;
+          return delay(8000).then(function () {
+            return attemptNoCors(url);
+          }).then(function (ok2) {
+            if (ok2) return true;
+            return delay(12000).then(function () {
+              return attemptNoCors(url);
+            });
+          });
+        });
+      }
+
+      // Оба плейлиста плеера — это плейлисты загрузок ровно тех двух
+      // каналов, на которые ведут YouTube-ссылки: если плейлист загрузился,
+      // каналы живы
+      function youtubeChannelsAlive() {
+        return new Promise(function (resolve) {
+          var pollsLeft = 15; // ~45 секунд
+          (function poll() {
+            try {
+              var list =
+                window.ytPlayer && ytPlayer.getPlaylist
+                  ? ytPlayer.getPlaylist()
+                  : null;
+              if (list && list.length) return resolve(true);
+            } catch (e) {}
+            if (pollsLeft-- <= 0) return resolve(false);
+            setTimeout(poll, 3000);
+          })();
+        });
+      }
+
+      // Точные проверки: resolve(false) = страницы точно нет;
+      // reject (API недоступен) = откат на generic-проверку
+      var LINK_EXACT_CHECKS = {
+        "https://open.spotify.com/artist/4R6fu0Zztw59xHFNUDqBD0": function (
+          url
+        ) {
+          return fetchWithTimeout(
+            "https://open.spotify.com/oembed?url=" + encodeURIComponent(url)
+          ).then(function (r) {
+            return r.ok;
+          });
+        },
+        "https://www.tiktok.com/@doublebarrelshotofficial": function (url) {
+          return fetchWithTimeout(
+            "https://www.tiktok.com/oembed?url=" + encodeURIComponent(url)
+          ).then(function (r) {
+            return r.ok;
+          });
+        },
+        "https://tiktok.com/@doublebarrelshotofficial": function (url) {
+          return fetchWithTimeout(
+            "https://www.tiktok.com/oembed?url=" + encodeURIComponent(url)
+          ).then(function (r) {
+            return r.ok;
+          });
+        },
+        "https://www.deezer.com/en/artist/353406092": function () {
+          return jsonp(
+            "https://api.deezer.com/artist/353406092?output=jsonp"
+          ).then(function (d) {
+            return !!(d && d.id);
+          });
+        },
+        "https://music.apple.com/artist/doublebarrelshot/1849632735":
+          function () {
+            return jsonp(
+              "https://itunes.apple.com/lookup?id=1849632735"
+            ).then(function (d) {
+              return !!(d && d.resultCount > 0);
+            });
+          },
+        "https://www.youtube.com/@doublebarrelshot": youtubeChannelsAlive,
+        "https://www.youtube.com/channel/UC2stfrCM7n59ZogxYDBnoOg":
+          youtubeChannelsAlive,
+      };
+
+      function checkLink(url) {
+        var exact = LINK_EXACT_CHECKS[url];
+        if (!exact) return linkAliveGeneric(url);
+        return exact().catch(function () {
+          return linkAliveGeneric(url);
+        });
+      }
+
+      (function checkAllLinks() {
+        var anchors = Array.prototype.slice.call(
+          document.querySelectorAll("a[href]")
+        );
+        var byUrl = {};
+        anchors.forEach(function (a) {
+          var href = a.getAttribute("href") || "";
+          if (!/^https?:\/\//i.test(href)) return; // якоря и mailto не трогаем
+          (byUrl[href] = byUrl[href] || []).push(a);
+        });
+        var urls = Object.keys(byUrl);
+        var settled = 0;
+        var deadUrls = [];
+        urls.forEach(function (url, i) {
+          setTimeout(function () {
+            checkLink(url).then(function (alive) {
+              settled++;
+              if (!alive) deadUrls.push(url);
+              if (settled === urls.length) finalizeLinks(deadUrls, byUrl);
+            });
+          }, LINK_CHECK_START_MS + i * LINK_CHECK_DELAY_MS);
+        });
+      })();
+
+      function finalizeLinks(deadUrls, byUrl) {
+        if (!deadUrls.length) return;
+        if (deadUrls.length > LINK_HIDE_LIMIT) {
+          console.info(
+            "Проверка ссылок: недоступны " +
+              deadUrls.length +
+              " из большого числа — похоже на сбой сети, ничего не скрываю:",
+            deadUrls
+          );
+          return;
+        }
+        deadUrls.forEach(function (url) {
+          byUrl[url].forEach(function (a) {
+            var li = a.closest("li");
+            if (li) li.remove();
+            else a.remove();
+          });
+          console.info("Ссылка скрыта как недоступная:", url);
+        });
+      }
+
       var ytApiScript = document.createElement("script");
       ytApiScript.src = "https://www.youtube.com/iframe_api";
       document.head.appendChild(ytApiScript);
