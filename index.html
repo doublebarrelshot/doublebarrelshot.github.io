@@ -296,6 +296,85 @@
         transform: translateZ(20px) rotateX(5deg) translateY(-5px);
       }
 
+      /* --- RANDOM YOUTUBE PLAYER WINDOW --- */
+      .player-window {
+        position: relative;
+        width: min(92%, 860px);
+        aspect-ratio: 16 / 9;
+        margin: 25px auto 5px;
+        background: #000000;
+        border: 2px solid var(--color-neon);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 0 15px rgba(0, 255, 255, 0.45);
+      }
+      .player-window #yt-player {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Fallback: обложка + песня, если YouTube упал с ошибкой */
+      .audio-fallback {
+        position: absolute;
+        inset: 0;
+        z-index: 5;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 16px;
+        text-align: center;
+      }
+      .audio-fallback[hidden] {
+        display: none;
+      }
+      .audio-fallback img {
+        max-width: 45%;
+        max-height: 55%;
+        border-radius: 8px;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        object-fit: contain;
+      }
+      .audio-fallback #af-title {
+        color: var(--color-neon);
+        font-weight: bold;
+        font-size: 1.05em;
+      }
+      .audio-fallback #af-status {
+        color: #999999;
+        font-size: 0.8em;
+      }
+      .audio-fallback audio {
+        width: 90%;
+      }
+      .audio-fallback #af-embed-holder {
+        width: 92%;
+        max-width: 649px;
+      }
+      .audio-fallback #af-embed-holder iframe {
+        width: 100%;
+        height: 252px;
+        border: 0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .audio-fallback button {
+        padding: 8px 16px;
+        background: #000000;
+        color: var(--color-neon);
+        border: 1px solid var(--color-neon);
+        border-radius: 20px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .audio-fallback button:hover {
+        background: var(--color-background-hover);
+      }
+
       /* --- CONTACT SECTION & SCROLL BUTTON --- */
       .contact {
         padding: 20px 80px 20px 20px;
@@ -433,6 +512,19 @@
       <h2 class="scrolling-container">
         <span class="scrolling-content">doublebarrelshot</span>
       </h2>
+      <div class="player-window">
+        <div id="yt-player"></div>
+        <div id="audio-fallback" class="audio-fallback" hidden>
+          <img id="af-cover" alt="обложка" />
+          <div id="af-embed-holder"></div>
+          <div id="af-title"></div>
+          <div id="af-status"></div>
+          <audio id="af-audio" controls></audio>
+          <button id="af-resume" type="button">
+            ▶ Следующее случайное видео
+          </button>
+        </div>
+      </div>
       <ul>
         <li>
           <a
@@ -653,6 +745,333 @@
         // Redirects the browser
         window.location.href = mailtoLink;
       }
+    </script>
+
+    <!-- === RANDOM YOUTUBE PLAYER (2 channels, endless random autoplay) === -->
+    <script>
+      // Служебные плейлисты загрузок обоих каналов (UC->UU). YouTube ведёт их
+      // сам, поэтому список видео всегда актуален — при открытии страницы
+      // плеер получает полный список видео канала напрямую от YouTube.
+      var CHANNEL_PLAYLISTS = [
+        "UUedMvVSW5baiqe6d137SUCw", // @doublebarrelshot (основной канал)
+        "UU2stfrCM7n59ZogxYDBnoOg", // doublebarrelshot - Topic
+      ];
+      var MIN_PLAYLIST_LEN = 8; // длина самого короткого из плейлистов
+      var START_VIDEO_IDS = [
+        "AHL_2S4PVHo", // Balalaika phonk
+        "TITtXS-pANM", // Riddle of the flame
+        "bJaEXubuzT0", // Brave bird
+        "4qfP-tTMg8E", // With smiling faces they will find us as we sleep
+      ];
+
+      var ytPlayer = null;
+      var currentChannel = -1;
+      var pendingRandomJump = false;
+      var errorStreak = 0;
+
+      function rnd(n) {
+        return Math.floor(Math.random() * n);
+      }
+
+      // Прыжок на случайный ролик внутри уже загруженного плейлиста
+      function playRandomInCurrentList() {
+        var list = ytPlayer.getPlaylist();
+        if (!list || list.length === 0) return;
+        var next = rnd(list.length);
+        if (list.length > 1) {
+          var cur = ytPlayer.getPlaylistIndex();
+          while (next === cur) next = rnd(list.length);
+        }
+        ytPlayer.playVideoAt(next);
+      }
+
+      // Случайный выбор по двум каналам: случайное число определяет канал,
+      // затем случайный индекс внутри плейлиста этого канала
+      function playRandom() {
+        var ch = rnd(CHANNEL_PLAYLISTS.length);
+        if (ch === currentChannel) {
+          playRandomInCurrentList();
+        } else {
+          currentChannel = ch;
+          pendingRandomJump = true;
+          ytPlayer.loadPlaylist({
+            list: CHANNEL_PLAYLISTS[ch],
+            listType: "playlist",
+            index: 0,
+          });
+        }
+      }
+
+      window.onYouTubeIframeAPIReady = function () {
+        ytPlayer = new YT.Player("yt-player", {
+          // Стартовый ролик нужен, чтобы плеер сразу открывался по
+          // валидной ссылке /embed/<id> — пустой /embed/ у части зрителей
+          // даёт YouTube Error 153 (ошибка конфигурации плеера)
+          videoId: START_VIDEO_IDS[rnd(START_VIDEO_IDS.length)],
+          playerVars: {
+            playsinline: 1,
+            rel: 0,
+          },
+          events: {
+            onReady: function (e) {
+              // Случайный канал и случайный стартовый ролик (ожидает нажатия Play)
+              currentChannel = rnd(CHANNEL_PLAYLISTS.length);
+              e.target.cuePlaylist({
+                list: CHANNEL_PLAYLISTS[currentChannel],
+                listType: "playlist",
+                index: rnd(MIN_PLAYLIST_LEN),
+              });
+            },
+            onStateChange: function (e) {
+              // Плейлист другого канала догрузился — прыгаем на случайный ролик
+              if (
+                pendingRandomJump &&
+                (e.data === YT.PlayerState.PLAYING ||
+                  e.data === YT.PlayerState.BUFFERING)
+              ) {
+                pendingRandomJump = false;
+                playRandomInCurrentList();
+              }
+              // Ролик закончился — снова случайный выбор, и так до бесконечности
+              if (e.data === YT.PlayerState.ENDED) {
+                playRandom();
+              }
+              if (e.data === YT.PlayerState.PLAYING) {
+                errorStreak = 0;
+              }
+            },
+            onError: function () {
+              // Любая ошибка YouTube — показываем обложку и играем песню
+              // из бесплатных источников (Audiomack -> iTunes -> Deezer)
+              errorStreak++;
+              if (errorStreak <= 8) handlePlaybackError();
+            },
+          },
+        });
+      };
+
+      // === FALLBACK: ОБЛОЖКА + ПЕСНЯ БЕСПЛАТНО ===
+
+      // Песни doublebarrelshot на Audiomack (embed играет полную песню с обложкой)
+      var AUDIOMACK_SONGS = [
+        { slug: "im-not-afraid-anymore", title: "im not afraid anymore" },
+        { slug: "morning", title: "morning" },
+        { slug: "were-in-the-clouds", title: "were in the clouds" },
+        {
+          slug: "where-they-end-and-i-begin",
+          title: "where they end and i begin",
+        },
+      ];
+
+      var afBox, afCover, afTitle, afStatus, afAudio, afEmbedHolder, afResume;
+
+      function afInit() {
+        afBox = document.getElementById("audio-fallback");
+        afCover = document.getElementById("af-cover");
+        afTitle = document.getElementById("af-title");
+        afStatus = document.getElementById("af-status");
+        afAudio = document.getElementById("af-audio");
+        afEmbedHolder = document.getElementById("af-embed-holder");
+        afResume = document.getElementById("af-resume");
+        afResume.addEventListener("click", resumeYouTube);
+        afAudio.addEventListener("ended", resumeYouTube);
+        afAudio.addEventListener("error", resumeYouTube);
+      }
+
+      // Убираем хэштеги, ссылки и символы из названия видео YouTube
+      function cleanTitle(t) {
+        return (t || "")
+          .replace(/https?:\/\/\S+/g, " ")
+          .replace(/#\S+/g, " ")
+          .replace(/[©®™«»"']/g, " ")
+          .replace(/[.,!?()\[\]:;]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function normTitle(t) {
+        return cleanTitle(t).toLowerCase().replace(/[^a-zа-яё0-9 ]/gi, "");
+      }
+
+      function showFallback(title, status, coverUrl) {
+        afBox.hidden = false;
+        afTitle.textContent = title || "";
+        afStatus.textContent = status || "";
+        afCover.hidden = !coverUrl;
+        if (coverUrl) afCover.src = coverUrl;
+        afAudio.hidden = true;
+        afAudio.removeAttribute("src");
+        afEmbedHolder.innerHTML = "";
+      }
+
+      function resumeYouTube() {
+        try {
+          afAudio.pause();
+        } catch (e) {}
+        afBox.hidden = true;
+        afCover.removeAttribute("src");
+        afEmbedHolder.innerHTML = "";
+        playRandom();
+      }
+
+      // JSONP-запрос (iTunes/Deezer отдают данные без ключа именно так)
+      function jsonp(url, timeoutMs) {
+        return new Promise(function (resolve, reject) {
+          var cb = "jsonp_cb_" + Math.random().toString(36).slice(2);
+          var script = document.createElement("script");
+          var done = false;
+          function cleanup() {
+            delete window[cb];
+            if (script.parentNode) script.parentNode.removeChild(script);
+          }
+          window[cb] = function (data) {
+            done = true;
+            cleanup();
+            resolve(data);
+          };
+          script.onerror = function () {
+            if (done) return;
+            done = true;
+            cleanup();
+            reject(new Error("jsonp error"));
+          };
+          setTimeout(function () {
+            if (done) return;
+            done = true;
+            cleanup();
+            reject(new Error("jsonp timeout"));
+          }, timeoutMs || 7000);
+          script.src = url + (url.indexOf("?") >= 0 ? "&" : "?") + "callback=" + cb;
+          document.head.appendChild(script);
+        });
+      }
+
+      function tryAudiomack(title) {
+        var norm = normTitle(title);
+        if (!norm) return null;
+        for (var i = 0; i < AUDIOMACK_SONGS.length; i++) {
+          var s = AUDIOMACK_SONGS[i];
+          if (norm.indexOf(s.title) >= 0 || s.title.indexOf(norm) >= 0) {
+            return s;
+          }
+        }
+        return null;
+      }
+
+      function playAudiomack(song, fallbackCover) {
+        afStatus.textContent = "Audiomack: полная песня";
+        var iframe = document.createElement("iframe");
+        iframe.src = "https://audiomack.com/embed/song/doublebarrelshot/" + song.slug;
+        iframe.scrolling = "no";
+        iframe.title = song.title;
+        afEmbedHolder.appendChild(iframe);
+        afCover.hidden = true;
+      }
+
+      function playItunesTrack(track) {
+        afTitle.textContent = track.title;
+        afStatus.textContent = "iTunes: 30-секундное превью";
+        if (track.cover) afCover.src = track.cover;
+        afCover.hidden = !track.cover;
+        afAudio.hidden = false;
+        afAudio.src = track.audio;
+        var p = afAudio.play();
+        if (p && p.catch)
+          p.catch(function () {
+            afStatus.textContent =
+              "iTunes: 30-секундное превью — нажмите ▶ для звучания";
+          });
+      }
+
+      function itunesSearch(query) {
+        return jsonp(
+          "https://itunes.apple.com/search?term=" +
+            encodeURIComponent(query + " doublebarrelshot") +
+            "&entity=song&limit=8"
+        ).then(function (data) {
+          var results = (data && data.results) || [];
+          var track = null;
+          for (var i = 0; i < results.length; i++) {
+            var r = results[i];
+            if (r.previewUrl) {
+              track = r;
+              if (/doublebarrelshot/i.test(r.artistName || "")) break;
+            }
+          }
+          if (!track) throw new Error("itunes empty");
+          return {
+            title: track.trackName,
+            cover: (track.artworkUrl100 || "").replace("100x100", "600x600"),
+            audio: track.previewUrl,
+          };
+        });
+      }
+
+      function deezerSearch(query) {
+        return jsonp(
+          "https://api.deezer.com/search?q=" +
+            encodeURIComponent(query + " doublebarrelshot") +
+            "&limit=8&output=jsonp"
+        ).then(function (data) {
+          var results = (data && data.data) || [];
+          var track = null;
+          for (var i = 0; i < results.length; i++) {
+            var r = results[i];
+            if (r.preview) {
+              track = r;
+              if (/doublebarrelshot/i.test((r.artist && r.artist.name) || "")) break;
+            }
+          }
+          if (!track) throw new Error("deezer empty");
+          return {
+            title: track.title,
+            cover: (track.album && track.album.cover_big) || "",
+            audio: track.preview,
+          };
+        });
+      }
+
+      function handlePlaybackError() {
+        if (!afBox) afInit();
+        var data = ytPlayer.getVideoData ? ytPlayer.getVideoData() : {};
+        var rawTitle = data.title || "";
+        var clean = cleanTitle(rawTitle);
+        var ytCover = data.video_id
+          ? "https://i.ytimg.com/vi/" + data.video_id + "/hqdefault.jpg"
+          : null;
+        showFallback(clean, "Ищу обложку и песню…", ytCover);
+
+        // 1. Audiomack — полная песня
+        var song = tryAudiomack(rawTitle);
+        if (song) {
+          playAudiomack(song, ytCover);
+          return;
+        }
+
+        // 2. iTunes превью, 3. Deezer превью; если по названию не нашлось —
+        // ищем по всему каталогу артиста, чтобы fallback срабатывал всегда
+        var query = clean || "";
+        itunesSearch(query)
+          .then(playItunesTrack)
+          .catch(function () {
+            return itunesSearch("").then(playItunesTrack);
+          })
+          .catch(function () {
+            return deezerSearch(query).then(playItunesTrack);
+          })
+          .catch(function () {
+            return deezerSearch("").then(playItunesTrack);
+          })
+          .catch(function () {
+            afStatus.textContent =
+              "Не нашлось бесплатного источника — возвращаюсь к видео…";
+            setTimeout(resumeYouTube, 2000);
+          });
+      }
+
+      var ytApiScript = document.createElement("script");
+      ytApiScript.src = "https://www.youtube.com/iframe_api";
+      document.head.appendChild(ytApiScript);
     </script>
   </body>
 </html>
