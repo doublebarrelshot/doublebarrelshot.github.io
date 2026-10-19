@@ -414,6 +414,26 @@
       .audio-fallback button:hover {
         background: var(--color-background-hover);
       }
+      /* Быстрые ссылки на российские сервисы — послушать целиком */
+      .audio-fallback .af-ru-links {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .audio-fallback .af-ru-links a {
+        padding: 6px 14px;
+        background: #000000;
+        color: var(--color-neon);
+        border: 1px solid var(--color-neon);
+        border-radius: 20px;
+        font-size: 13px;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .audio-fallback .af-ru-links a:hover {
+        background: var(--color-background-hover);
+      }
 
       /* --- CONTACT SECTION & SCROLL BUTTON --- */
       .contact {
@@ -580,6 +600,7 @@
           <div id="af-title"></div>
           <div id="af-status"></div>
           <audio id="af-audio" controls></audio>
+          <div id="af-ru-links" class="af-ru-links"></div>
           <button id="af-resume" type="button">
             ▶ Следующее случайное видео
           </button>
@@ -960,6 +981,7 @@
       // от плеера не получен — перезагружаем плейлист сразу со случайным
       // индексом (так случайность не зависит от quirks getPlaylist)
       function playRandom() {
+        if (!ytPlayer) return;
         var ch = rnd(CHANNEL_PLAYLISTS.length);
         if (ch === currentChannel && playRandomInCurrentList()) return;
         currentChannel = ch;
@@ -1005,6 +1027,7 @@
               }
               if (e.data === YT.PlayerState.PLAYING) {
                 errorStreak = 0;
+                clearTimeout(ytWatchdogTimer);
                 rememberInHistory();
               }
             },
@@ -1072,6 +1095,25 @@
         afAudio.hidden = true;
         afAudio.removeAttribute("src");
         afEmbedHolder.innerHTML = "";
+        // Быстрые ссылки на российские сервисы: послушать трек целиком
+        // (Звук не отдаёт фрагмент без входа — даём один клик до песни)
+        var ru = document.getElementById("af-ru-links");
+        if (ru) {
+          ru.innerHTML = "";
+          var q = encodeURIComponent((title || "doublebarrelshot") + " doublebarrelshot");
+          var yandex = document.createElement("a");
+          yandex.href = "https://music.yandex.ru/search?text=" + q;
+          yandex.target = "_blank";
+          yandex.rel = "noopener";
+          yandex.textContent = "Яндекс Музыка ▸";
+          var zvuk = document.createElement("a");
+          zvuk.href = "https://zvuk.com/search?query=" + q;
+          zvuk.target = "_blank";
+          zvuk.rel = "noopener";
+          zvuk.textContent = "Звук ▸";
+          ru.appendChild(yandex);
+          ru.appendChild(zvuk);
+        }
         fitPlayerWindow();
         requestAnimationFrame(fitPlayerWindow);
       }
@@ -1201,9 +1243,23 @@
         });
       }
 
+      // Вотчдог: если YouTube за 15 секунд ни заиграл, ни подготовился
+      // (блокировка/сеть) — показываем обложку и ознакомительный фрагмент
+      // из доступных источников, как при ошибке плеера
+      function ytWatchdog() {
+        var st = -9;
+        try {
+          st = ytPlayer && ytPlayer.getPlayerState ? ytPlayer.getPlayerState() : -9;
+        } catch (e) {}
+        // 1 — играет, 3 — буферизуется, 5 — запужено и ждёт клика: это норма
+        if (st === 1 || st === 3 || st === 5) return;
+        handlePlaybackError();
+      }
+      var ytWatchdogTimer = setTimeout(ytWatchdog, 15000);
+
       function handlePlaybackError() {
         if (!afBox) afInit();
-        var data = ytPlayer.getVideoData ? ytPlayer.getVideoData() : {};
+        var data = ytPlayer && ytPlayer.getVideoData ? ytPlayer.getVideoData() : {};
         var rawTitle = data.title || "";
         var clean = cleanTitle(rawTitle);
         var ytCover = data.video_id
