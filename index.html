@@ -379,6 +379,15 @@
         box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
         object-fit: contain;
       }
+      /* Радио-режим (РФ, YouTube недоступен): обложка — главный элемент */
+      .audio-fallback.radio img {
+        max-width: 85%;
+        max-height: 80%;
+      }
+      /* В радио-режиме кнопки нет — её роль играет стрелка ▶ в строке */
+      .audio-fallback.radio #af-resume {
+        display: none;
+      }
       .audio-fallback #af-title {
         color: var(--color-neon);
         font-weight: bold;
@@ -1107,6 +1116,10 @@
         afAudio.hidden = true;
         afAudio.removeAttribute("src");
         afEmbedHolder.innerHTML = "";
+        // Радио-режим (РФ, YouTube недоступен): обложка крупнее,
+        // кнопки «Следующее случайное видео» нет — её роль играет
+        // стрелка ▶ в бегущей строке
+        afBox.classList.toggle("radio", ytUnusable);
         // Быстрые ссылки на российские сервисы: послушать трек целиком
         // (Звук не отдаёт фрагмент без входа — даём один клик до песни)
         var ru = document.getElementById("af-ru-links");
