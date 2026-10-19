@@ -1332,7 +1332,7 @@
         });
       }
 
-      // Вотчдог: если YouTube за 15 секунд ни заиграл, ни подготовился
+      // Вотчдог: если YouTube за 6 секунд ни заиграл, ни подготовился
       // (блокировка/сеть) — показываем обложку и ознакомительный фрагмент
       // из доступных источников, как при ошибке плеера
       function ytWatchdog() {
@@ -1345,7 +1345,7 @@
         ytUnusable = true;
         handlePlaybackError();
       }
-      var ytWatchdogTimer = setTimeout(ytWatchdog, 15000);
+      var ytWatchdogTimer = setTimeout(ytWatchdog, 6000);
 
       function handlePlaybackError() {
         if (!afBox) afInit();
