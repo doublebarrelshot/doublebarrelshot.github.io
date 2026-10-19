@@ -838,7 +838,6 @@
 
       var ytPlayer = null;
       var currentChannel = -1;
-      var pendingRandomJump = false;
       var errorStreak = 0;
 
       // История просмотренных видео для стрелок «предыдущее/следующее»
@@ -880,33 +879,33 @@
         return Math.floor(Math.random() * n);
       }
 
-      // Прыжок на случайный ролик внутри уже загруженного плейлиста
+      // Прыжок на случайный ролик внутри уже загруженного плейлиста.
+      // Возвращает false, если плеер ещё не отдал список (getPlaylist пуст)
       function playRandomInCurrentList() {
         var list = ytPlayer.getPlaylist();
-        if (!list || list.length === 0) return;
+        if (!list || list.length === 0) return false;
         var next = rnd(list.length);
         if (list.length > 1) {
           var cur = ytPlayer.getPlaylistIndex();
           while (next === cur) next = rnd(list.length);
         }
         ytPlayer.playVideoAt(next);
+        return true;
       }
 
       // Случайный выбор по двум каналам: случайное число определяет канал,
-      // затем случайный индекс внутри плейлиста этого канала
+      // затем случайный индекс внутри плейлиста этого канала. Если список
+      // от плеера не получен — перезагружаем плейлист сразу со случайным
+      // индексом (так случайность не зависит от quirks getPlaylist)
       function playRandom() {
         var ch = rnd(CHANNEL_PLAYLISTS.length);
-        if (ch === currentChannel) {
-          playRandomInCurrentList();
-        } else {
-          currentChannel = ch;
-          pendingRandomJump = true;
-          ytPlayer.loadPlaylist({
-            list: CHANNEL_PLAYLISTS[ch],
-            listType: "playlist",
-            index: 0,
-          });
-        }
+        if (ch === currentChannel && playRandomInCurrentList()) return;
+        currentChannel = ch;
+        ytPlayer.loadPlaylist({
+          list: CHANNEL_PLAYLISTS[ch],
+          listType: "playlist",
+          index: rnd(MIN_PLAYLIST_LEN),
+        });
       }
 
       window.onYouTubeIframeAPIReady = function () {
@@ -930,15 +929,6 @@
               });
             },
             onStateChange: function (e) {
-              // Плейлист другого канала догрузился — прыгаем на случайный ролик
-              if (
-                pendingRandomJump &&
-                (e.data === YT.PlayerState.PLAYING ||
-                  e.data === YT.PlayerState.BUFFERING)
-              ) {
-                pendingRandomJump = false;
-                playRandomInCurrentList();
-              }
               // Ролик закончился — снова случайный выбор, и так до бесконечности
               if (e.data === YT.PlayerState.ENDED) {
                 playRandom();
@@ -1177,26 +1167,24 @@
           });
       }
 
-      // === ПРОВЕРКА ЖИВОСТИ ССЫЛОК (запускается параллельно с плеером) ===
-      // CORS не позволяет читать коды ответов чужих сайтов, поэтому:
-      // 1) где у платформы есть открытый oEmbed/JSONP-API — проверяем
-      //    существование страницы артиста по-настоящему (точная проверка);
-      // 2) YouTube-ссылки проверяем фактом загрузки плейлистов каналов
-      //    самим плеером (no-cors fetch страницы канала YouTube отвергает);
-      // 3) остальные — no-cors fetch: отвечает ли домен вообще (ловит
-      //    мёртвые домены и обрывы сети; статус/гео-блок так не увидеть).
-      // Предохранитель: если недоступных больше LINK_HIDE_LIMIT — считаем
-      // это сбоем сети у зрителя и ничего не скрываем.
+      // === ПРОВЕРКА ВСЕХ ССЫЛОК ПРИ ОТКРЫТИИ СТРАНИЦЫ ===
+      // Работает параллельно плееру. Точные проверки страниц артиста —
+      // через открытые API платформ (Spotify/TikTok oEmbed, Deezer/iTunes
+      // JSONP); остальные — доступность домена: no-cors запрос, а если его
+      // отвергла защита сайта (CORP и т.п.) — favicon картинкой, он защите
+      // не подчиняется. Ссылка мёртвая, только если недоступны оба способа.
+      // Предохранитель: если «мёртвых» больше LINK_HIDE_LIMIT — считаем это
+      // сбоем сети у зрителя и ничего не скрываем.
       var LINK_CHECK_START_MS = 1500; // даём странице прогрузиться
       var LINK_CHECK_DELAY_MS = 250; // разброс старта, чтобы не грузить сеть
-      var LINK_CHECK_TIMEOUT_MS = 8000;
+      var LINK_CHECK_TIMEOUT_MS = 9000;
       var LINK_HIDE_LIMIT = 5;
 
-      function delay(ms) {
-        return new Promise(function (resolve) {
-          setTimeout(resolve, ms);
-        });
-      }
+      // Страницы артиста, удалённые на стороне сервиса (проверено вручную:
+      // из браузера это не определить — iHeart отдаёт 403-заглушку)
+      var KNOWN_DEAD_LINKS = [
+        "https://www.iheart.com/artist/doublebarrelshot-48468270/",
+      ];
 
       function fetchWithTimeout(url, options, timeoutMs) {
         return new Promise(function (resolve, reject) {
@@ -1219,152 +1207,177 @@
         });
       }
 
-      function attemptNoCors(url) {
+      // favicon как запасной способ убедиться, что домен жив
+      function checkFaviconHost(url) {
+        return new Promise(function (resolve) {
+          var host = url.replace(/^([^:]+:\/\/[^/]+).*$/, "$1");
+          var img = new Image();
+          var done = false;
+          var timer = setTimeout(function () {
+            if (!done) {
+              done = true;
+              resolve(false);
+            }
+          }, 8000);
+          img.onload = function () {
+            if (!done) {
+              done = true;
+              clearTimeout(timer);
+              resolve(true);
+            }
+          };
+          img.onerror = function () {
+            if (!done) {
+              done = true;
+              clearTimeout(timer);
+              resolve(false);
+            }
+          };
+          img.src = host + "/favicon.ico?lc=" + Date.now();
+        });
+      }
+
+      function checkReachable(url) {
         return fetchWithTimeout(url, {
           mode: "no-cors",
           redirect: "follow",
-          cache: "no-store",
         })
           .then(function () {
             return true;
           })
           .catch(function () {
-            return false;
+            return checkFaviconHost(url);
           });
       }
 
-      // Три попытки вразнобой: мгновенный сбой сети или «холодный старт»
-      // страницы не должен привести к скрытию живой ссылки
-      function linkAliveGeneric(url) {
-        return attemptNoCors(url).then(function (ok) {
-          if (ok) return true;
-          return delay(8000).then(function () {
-            return attemptNoCors(url);
-          }).then(function (ok2) {
-            if (ok2) return true;
-            return delay(12000).then(function () {
-              return attemptNoCors(url);
+      // Точные проверки существования страницы артиста. resolve = страница
+      // жива; reject {dead:true} = удалена; обычная ошибка сети = откат
+      // на простую доступность
+      var ENTITY_CHECKS = [
+        {
+          match: /^https:\/\/open\.spotify\.com\//,
+          check: function (url) {
+            return fetchWithTimeout(
+              "https://open.spotify.com/oembed?url=" + encodeURIComponent(url)
+            ).then(function (r) {
+              if (r.status === 404 || r.status === 410)
+                throw { dead: true, why: "страница Spotify не найдена" };
             });
-          });
-        });
-      }
-
-      // Оба плейлиста плеера — это плейлисты загрузок ровно тех двух
-      // каналов, на которые ведут YouTube-ссылки: если плейлист загрузился,
-      // каналы живы
-      function youtubeChannelsAlive() {
-        return new Promise(function (resolve) {
-          var pollsLeft = 15; // ~45 секунд
-          (function poll() {
-            try {
-              var list =
-                window.ytPlayer && ytPlayer.getPlaylist
-                  ? ytPlayer.getPlaylist()
-                  : null;
-              if (list && list.length) return resolve(true);
-            } catch (e) {}
-            if (pollsLeft-- <= 0) return resolve(false);
-            setTimeout(poll, 3000);
-          })();
-        });
-      }
-
-      // Точные проверки: resolve(false) = страницы точно нет;
-      // reject (API недоступен) = откат на generic-проверку
-      var LINK_EXACT_CHECKS = {
-        "https://open.spotify.com/artist/4R6fu0Zztw59xHFNUDqBD0": function (
-          url
-        ) {
-          return fetchWithTimeout(
-            "https://open.spotify.com/oembed?url=" + encodeURIComponent(url)
-          ).then(function (r) {
-            return r.ok;
-          });
+          },
         },
-        "https://www.tiktok.com/@doublebarrelshotofficial": function (url) {
-          return fetchWithTimeout(
-            "https://www.tiktok.com/oembed?url=" + encodeURIComponent(url)
-          ).then(function (r) {
-            return r.ok;
-          });
+        {
+          match: /^https:\/\/(www\.)?tiktok\.com\//,
+          check: function (url) {
+            return fetchWithTimeout(
+              "https://www.tiktok.com/oembed?url=" + encodeURIComponent(url)
+            ).then(function (r) {
+              if (r.status === 404 || r.status === 410)
+                throw { dead: true, why: "аккаунт TikTok не найден" };
+            });
+          },
         },
-        "https://tiktok.com/@doublebarrelshotofficial": function (url) {
-          return fetchWithTimeout(
-            "https://www.tiktok.com/oembed?url=" + encodeURIComponent(url)
-          ).then(function (r) {
-            return r.ok;
-          });
+        {
+          match: /^https:\/\/www\.deezer\.com\//,
+          check: function () {
+            return jsonp(
+              "https://api.deezer.com/artist/353406092?output=jsonp"
+            ).then(function (d) {
+              if (d && d.error)
+                throw { dead: true, why: "артист удалён из Deezer" };
+            });
+          },
         },
-        "https://www.deezer.com/en/artist/353406092": function () {
-          return jsonp(
-            "https://api.deezer.com/artist/353406092?output=jsonp"
-          ).then(function (d) {
-            return !!(d && d.id);
-          });
-        },
-        "https://music.apple.com/artist/doublebarrelshot/1849632735":
-          function () {
+        {
+          match: /^https:\/\/music\.apple\.com\//,
+          check: function () {
             return jsonp(
               "https://itunes.apple.com/lookup?id=1849632735"
             ).then(function (d) {
-              return !!(d && d.resultCount > 0);
+              if (!d || !d.resultCount)
+                throw { dead: true, why: "артист не найден в Apple Music" };
             });
           },
-        "https://www.youtube.com/@doublebarrelshot": youtubeChannelsAlive,
-        "https://www.youtube.com/channel/UC2stfrCM7n59ZogxYDBnoOg":
-          youtubeChannelsAlive,
-      };
+        },
+      ];
 
       function checkLink(url) {
-        var exact = LINK_EXACT_CHECKS[url];
-        if (!exact) return linkAliveGeneric(url);
-        return exact().catch(function () {
-          return linkAliveGeneric(url);
-        });
+        var rule = null;
+        for (var i = 0; i < ENTITY_CHECKS.length; i++) {
+          if (ENTITY_CHECKS[i].match.test(url)) {
+            rule = ENTITY_CHECKS[i];
+            break;
+          }
+        }
+        var verdict;
+        if (rule) {
+          // точная проверка; сетевой сбой не считаем смертью ссылки —
+          // fallback на простую доступность
+          verdict = rule.check(url).catch(function (e) {
+            if (e && e.dead) throw e;
+            return checkReachable(url).then(function (ok) {
+              if (!ok) throw { dead: true, why: "сайт недоступен" };
+            });
+          });
+        } else {
+          verdict = checkReachable(url).then(function (ok) {
+            if (!ok) throw { dead: true, why: "сайт недоступен" };
+          });
+        }
+        return verdict;
       }
 
       (function checkAllLinks() {
-        var anchors = Array.prototype.slice.call(
-          document.querySelectorAll("a[href]")
+        var anchors = document.querySelectorAll(
+          ".links ul a[href^='http'], nav a[href^='http']"
         );
         var byUrl = {};
-        anchors.forEach(function (a) {
-          var href = a.getAttribute("href") || "";
-          if (!/^https?:\/\//i.test(href)) return; // якоря и mailto не трогаем
+        Array.prototype.forEach.call(anchors, function (a) {
+          var href = a.getAttribute("href");
           (byUrl[href] = byUrl[href] || []).push(a);
         });
         var urls = Object.keys(byUrl);
         var settled = 0;
-        var deadUrls = [];
+        var dead = [];
         urls.forEach(function (url, i) {
           setTimeout(function () {
-            checkLink(url).then(function (alive) {
+            function done() {
               settled++;
-              if (!alive) deadUrls.push(url);
-              if (settled === urls.length) finalizeLinks(deadUrls, byUrl);
-            });
+              if (settled === urls.length) applyLinkHiding(dead, byUrl);
+            }
+            if (KNOWN_DEAD_LINKS.indexOf(url) >= 0) {
+              dead.push({ url: url, why: "страница артиста удалена" });
+              done();
+              return;
+            }
+            checkLink(url)
+              .catch(function (e) {
+                dead.push({ url: url, why: (e && e.why) || "недоступна" });
+              })
+              .then(done);
           }, LINK_CHECK_START_MS + i * LINK_CHECK_DELAY_MS);
         });
       })();
 
-      function finalizeLinks(deadUrls, byUrl) {
-        if (!deadUrls.length) return;
-        if (deadUrls.length > LINK_HIDE_LIMIT) {
+      // Скрываем через display:none, а не удалением — так очерёдность
+      // «треугольников» в сетке ссылок не переезжает
+      function applyLinkHiding(dead, byUrl) {
+        if (!dead.length) return;
+        if (dead.length > LINK_HIDE_LIMIT) {
           console.info(
             "Проверка ссылок: недоступны " +
-              deadUrls.length +
-              " из большого числа — похоже на сбой сети, ничего не скрываю:",
-            deadUrls
+              dead.length +
+              " — похоже на сбой сети, ничего не скрываю:",
+            dead
           );
           return;
         }
-        deadUrls.forEach(function (url) {
-          byUrl[url].forEach(function (a) {
+        dead.forEach(function (entry) {
+          (byUrl[entry.url] || []).forEach(function (a) {
             var li = a.closest("li");
-            if (li) li.remove();
-            else a.remove();
+            if (li) li.style.display = "none";
+            else a.style.display = "none";
           });
-          console.info("Ссылка скрыта как недоступная:", url);
+          console.info("Ссылка скрыта как неработающая:", entry.url, "—", entry.why);
         });
       }
 
